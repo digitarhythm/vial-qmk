@@ -1,0 +1,10 @@
+MAGIC_ENABLE = no
+
+AUDIO_ENABLE = no
+GRAVE_ESC_ENABLE = yes
+SPACE_CADET_ENABLE = no
+
+CUSTOM_MATRIX = lite
+DEBOUNCE_TYPE = sym_eager_pk
+
+SRC += matrix.c

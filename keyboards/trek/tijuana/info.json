@@ -1,0 +1,114 @@
+{
+  "manufacturer": "Hajime Oh-yake",
+  "keyboard_name": "TReK G50 TIJUANA",
+  "maintainer": "digitarhythm",
+  "bootloader": "rp2040",
+  "processor": "RP2040",
+  "diode_direction": "COL2ROW",
+  "features": {
+    "bootmagic": true,
+    "command": false,
+    "console": false,
+    "extrakey": true,
+    "mousekey": true,
+    "nkro": false,
+    "encoder": true
+  },
+  "rgb_matrix": {
+    "driver": "ws2812",
+    "sleep": false,
+    "max brightness ": 128,
+    "hue steps": 4,
+    "sat steps": 4,
+    "speed_steps": 4
+  },
+  "rgblight": {
+    "led_count": 54,
+    "animations": {
+      "all": true
+    }
+  },
+  "ws2812": {
+    "driver":"vendor",
+    "pin":"GP14"
+  },
+  "matrix_pins": {
+    "cols": ["GP0", "GP1", "GP2", "GP3", "GP4", "GP5", "GP6"],
+    "rows": ["GP29", "GP28", "GP27", "GP26", "GP15"]
+  },
+  "encoder": {
+    "rotary": [
+      { "pin_a": "GP9", "pin_b": "GP10", "resolution": 2 },
+      { "pin_a": "GP11", "pin_b": "GP12", "resolution": 2 },
+      { "pin_a": "GP7", "pin_b": "GP8", "resolution": 4 }
+    ]
+  },
+  "usb": {
+    "device_version": "1.0.0",
+    "vid": "0x1209",
+    "pid": "0xFF02"
+  },
+  "layouts": {
+    "LAYOUT_tijuana": {
+      "layout": [
+        {"matrix":[0,0], "x":-7.92, "y":1.11},
+        {"matrix":[0,1], "x":-6.42, "y":5.06, "w":0.5},
+        {"matrix":[0,2], "x":-5.84, "y":7.81},
+        {"matrix":[0,3], "x":-4.78, "y":12.58},
+        {"matrix":[0,4], "x":-3.8, "y":7.91},
+        {"matrix":[0,5], "x":-2.82, "y":7.81},
+        {"matrix":[0,6], "x":-1.32, "y":2.31},
+        {"matrix":[1,0], "x":-7.92, "y":2.15, "w":1.25},
+        {"matrix":[1,1], "x":8.08, "y":5.06, "w":0.5},
+        {"matrix":[1,2], "x":-5.5, "y":8.83},
+        {"matrix":[1,3], "x":-4.41, "y":13.59},
+        {"matrix":[1,4], "x":-3.47, "y":8.92},
+        {"matrix":[1,5], "x":-2.51, "y":8.82},
+        {"matrix":[1,6], "x":-1.32, "y":3.31},
+        {"matrix":[2,0], "x":-0.81, "y":1.16, "w":0.5},
+        {"matrix":[2,1], "x":0.68, "y":1.16, "w":0.5},
+        {"matrix":[2,2], "x":-5.19, "y":9.84},
+        {"matrix":[2,3], "x":-4.07, "y":14.6},
+        {"matrix":[2,4], "x":-3.16, "y":9.93},
+        {"matrix":[2,5], "x":-2.24, "y":9.83},
+        {"matrix":[2,6], "x":-0.32, "y":4.31},
+        {"matrix":[3,1], "x":-0.545, "y":15.29, "w":1.25},
+        {"matrix":[3,2], "x":-0.645, "y":19.93, "w":1.75},
+        {"matrix":[3,3], "x":-0.275, "y":-0.14, "w":1.25},
+        {"matrix":[3,4], "x":-1.32, "y":5.31},
+        {"matrix":[3,5], "x":-1.32, "y":4.31},
+        {"matrix":[3,6], "x":-0.32, "y":5.31},
+        {"matrix":[4,0], "x":-7.67, "y":4.91, "w":1.25, "h":1.25},
+        {"matrix":[4,6], "x":-0.32, "y":1.16},
+        {"matrix":[5,0], "x":-0.32, "y":2.31},
+        {"matrix":[5,1], "x":0.68, "y":2.31},
+        {"matrix":[5,2], "x":1.68, "y":21.68},
+        {"matrix":[5,3], "x":2.67, "y":17.14},
+        {"matrix":[5,4], "x":3.65, "y":12.58},
+        {"matrix":[5,5], "x":4.86, "y":18.06},
+        {"matrix":[5,6], "x":6.79, "y":1.11, "w":1.5},
+        {"matrix":[6,6], "x":7.03, "y":2.15, "w":1.25},
+        {"matrix":[6,0], "x":-0.32, "y":3.31},
+        {"matrix":[6,1], "x":0.68, "y":3.31},
+        {"matrix":[6,2], "x":1.88, "y":22.69},
+        {"matrix":[6,3], "x":2.83, "y":18.15},
+        {"matrix":[6,4], "x":3.77, "y":13.59},
+        {"matrix":[6,5], "x":5.68, "y":23.49},
+        {"matrix":[7,0], "x":0.68, "y":4.31},
+        {"matrix":[7,1], "x":1.61, "y":23.7},
+        {"matrix":[7,2], "x":2.52, "y":19.16},
+        {"matrix":[7,3], "x":3.43, "y":14.6},
+        {"matrix":[7,4], "x":4.56, "y":19.07},
+        {"matrix":[7,5], "x":5.75, "y":21.43},
+        {"matrix":[7,6], "x":6.79, "y":3.19, "w":1.5},
+        {"matrix":[8,0], "x":0.68, "y":5.31},
+        {"matrix":[8,1], "x":-0.485, "y":6.06, "w":1.25},
+        {"matrix":[8,2], "x":3.27, "y":10.67, "w":1.75},
+        {"matrix":[8,3], "x":-0.235, "y":10.63, "w":1.25},
+        {"matrix":[8,4], "x":4.71, "y":17.04},
+        {"matrix":[8,5], "x":5.95, "y":22.48},
+        {"matrix":[9,6], "x":6.83, "y":4.91, "w":1.25, "h":1.25}
+      ]
+    }
+  }
+}

@@ -31,6 +31,10 @@ quantum/version.h
 *.uf2
 *.vfw
 
+# Excluded TReK firmware file
+!/keyboards/trek/*.uf2
+!/keyboards/trek/*.hex
+
 # DD config at wrong location
 /keyboards/**/keymaps/*/info.json
 

@@ -16,9 +16,9 @@
 
 #pragma once
 
-#define VIAL_KEYBOARD_UID {0x83, 0x12, 0x32, 0x5E, 0x0F, 0xD7, 0xD5, 0x27}
-#define VIAL_UNLOCK_COMBO_ROWS { 0, 1 }
+#define VIAL_KEYBOARD_UID {0xE4, 0xCB, 0xFB, 0xDF, 0xDE, 0xE6, 0x16, 0xAC}
 #define VIAL_UNLOCK_COMBO_COLS { 0, 0 }
+#define VIAL_UNLOCK_COMBO_ROWS { 0, 1 }
 
 /* Select hand configuration */
 
@@ -31,7 +31,7 @@
   #undef RGBLED_NUM
 #endif
 
-#define RGB_MATRIX_LED_COUNT 41
+#define RGB_MATRIX_LED_COUNT 42
 
 #ifdef RGB_MATRIX_ENABLE
   #define RGB_DISABLE_WHEN_USB_SUSPENDED
@@ -92,7 +92,7 @@
 #define LAYOUT( \
   k00, k01, k02, k03, k04, k05, k40, k41, k42, k43, k44, k45, \
   k10, k11, k12, k13, k14, k15, k50, k51, k52, k53, k54, k55, \
-  k20, k21, k22, k23, k24, k25, k60, k61, k62, k63, k64,      \
+  k20, k21, k22, k23, k24, k25, k60, k61, k62, k63, k64, k65, \
   k30, k31, k32, k33,      k35,      k71, k72, k73,      k75  \
 ) \
 { \
@@ -103,6 +103,6 @@
 \
   {   k40,   k41,   k42,   k43,   k44,   k45 }, \
   {   k50,   k51,   k52,   k53,   k54,   k55 }, \
-  {   k60,   k61,   k62,   k63,   k64, KC_NO }, \
+  {   k60,   k61,   k62,   k63,   k64,   k65 }, \
   { KC_NO,   k71,   k72,   k73, KC_NO,   k75 }  \
 }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 VIA_ENABLE = yes
 VIAL_ENABLE = yes
 
@@ -5,3 +6,13 @@ LTO_ENABLE = yes
 KEY_OVERRIDE_ENABLE = no
 MAGIC_ENABLE = no
 TAP_DANCE_ENABLE = no
+=======
+VIA_ENABLE = yes
+VIAL_ENABLE = yes
+
+LTO_ENABLE = yes
+KEY_OVERRIDE_ENABLE = no
+MAGIC_ENABLE = no
+TAP_DANCE_ENABLE = no
+QMK_SETTINGS = no
+>>>>>>> 3f0184ce6e40252da57db3c411a50521ebbd7fff

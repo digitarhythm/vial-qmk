@@ -86,7 +86,7 @@ led_config_t g_led_config = {
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-  [_BASE]   = { ENCODER_CCW_CW(LCTL(KC_PGUP), LCTL(KC_PGDN)), ENCODER_CCW_CW(KC_VOLD, KC_VOLU)            , ENCODER_CCW_CW(KC_WH_D, KC_WH_U) },
+  [_BASE]   = { ENCODER_CCW_CW(LCTL(KC_PGDN), LCTL(KC_PGUP)), ENCODER_CCW_CW(KC_VOLU, KC_VOLD)            , ENCODER_CCW_CW(KC_WH_U, KC_WH_D) },
   [_LOWER]  = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) },
   [_RAISE]  = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(LCTL(KC_VOLD), LCTL(KC_VOLU)), ENCODER_CCW_CW(_______, _______) },
   [_ADJUST] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) }

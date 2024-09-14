@@ -1,8 +1,8 @@
 #pragma once
 
 #define VIAL_KEYBOARD_UID {0x4D, 0x10, 0xD8, 0x95, 0xCC, 0xE8, 0x6B, 0x28}
-#define VIAL_UNLOCK_COMBO_ROWS {1, 0}
-#define VIAL_UNLOCK_COMBO_COLS {1, 1}
+#define VIAL_UNLOCK_COMBO_ROWS {1, 1}
+#define VIAL_UNLOCK_COMBO_COLS {0, 1}
 
 #define TAPPING_TERM 200
 #define HOLD_ON_OTHER_KEY_PRESS

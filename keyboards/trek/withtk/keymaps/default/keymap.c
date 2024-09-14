@@ -12,18 +12,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                    KC_P0,      KC_PDOT, LT(2,KC_PPLS)
   ),
   [1] = LAYOUT(
-       _______,   _______,       _______,      _______,       _______,
+       _______,   _______,          KC_H,   LGUI(KC_Z),     LSG(KC_Z),
        _______,   _______,        KC_ESC,         KC_X,       KC_BSPC,
                     TG(1),          KC_D,         KC_M,          KC_R,
-                           LGUI(KC_SLSH),         KC_H,          KC_W,
+                           LGUI(KC_SLSH),         KC_E,          KC_W,
                                  KC_LGUI, LSFT_T(KC_V),        KC_ENT
   ),
   [2] = LAYOUT(
-       _______,   _______,       _______,      _______,       _______,
-       _______,   _______,       _______,      _______,       _______,
-                  _______,       RGB_HUD,      RGB_HUI,       _______,
-                                 RGB_SPD,      RGB_SPI,       _______,
-                                 RGB_TOG,      _______,       _______
+       _______,   _______,       RGB_MOD,     RGB_RMOD,       RGB_TOG,
+       _______,   _______,       RGB_SPD,      RGB_SPI,       _______,
+                  _______,       RGB_VAD,      RGB_VAI,       _______,
+                                 RGB_HUD,      RGB_HUI,       _______,
+                                 RGB_SAD,      RGB_SAI,       _______
   ),
   [3] = LAYOUT(
        _______,   _______,       _______,      _______,       _______,
@@ -59,7 +59,7 @@ led_config_t g_led_config = {
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-/* layer 0 */    [0] = { ENCODER_CCW_CW(LGUI(KC_MINS), LGUI(KC_PLUS)), ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_WH_D, KC_WH_U) },
+/* layer 0 */    [0] = { ENCODER_CCW_CW(LGUI(KC_MINS), LGUI(KC_PLUS)), ENCODER_CCW_CW(KC_WH_D, KC_WH_U),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
 /* layer 1 */    [1] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______) },
 /* layer 2 */    [2] = { ENCODER_CCW_CW(RGB_VAD, RGB_VAI),             ENCODER_CCW_CW(RGB_RMOD, RGB_MOD), ENCODER_CCW_CW(_______, _______) },
 /* layer 3 */    [3] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______) }

@@ -1,0 +1,4 @@
+#pragma once
+#define ANALOG_JOYSTICK_X_AXIS_PIN GP29
+#define ANALOG_JOYSTICK_Y_AXIS_PIN GP28
+

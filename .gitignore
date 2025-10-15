@@ -38,6 +38,8 @@ quantum/version.h
 *.uf2
 *.vfw
 
+!keyboards/trek/*/*.uf2
+
 # DD config at wrong location
 /keyboards/**/keymaps/*/info.json
 /keyboards/**/keymaps/*/keyboard.json

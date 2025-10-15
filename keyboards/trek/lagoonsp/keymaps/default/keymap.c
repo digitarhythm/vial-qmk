@@ -10,6 +10,11 @@
 #define _ADJUST  4
 #define _ADJUST2 5
 
+enum {
+  _MAC,
+  _WIN
+} os_layer_num;
+               
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT(
   //|---------------+----------------+----------------+-------------+----------+--------+--------------+-------------+---------------+-----------------+--------+----------------|
@@ -111,11 +116,30 @@ led_config_t g_led_config = {
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
   [_BASE]    = { ENCODER_CCW_CW(LCTL(KC_PGDN), LCTL(KC_PGUP)), ENCODER_CCW_CW(LCTL(KC_VOLD), LCTL(KC_VOLU)), ENCODER_CCW_CW(KC_WH_U, KC_WH_D) },
-  [_BASE2]   = { ENCODER_CCW_CW(LCTL(KC_PGDN), LCTL(KC_PGUP)), ENCODER_CCW_CW(LCTL(KC_VOLD), LCTL(KC_VOLU)), ENCODER_CCW_CW(KC_WH_U, KC_WH_D) },
-  [_LOWER]   = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)           	, ENCODER_CCW_CW(_______, _______) },
-  [_LOWER]   = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)           	, ENCODER_CCW_CW(_______, _______) },
-  [_ADJUST]  = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)           	, ENCODER_CCW_CW(_______, _______) },
-  [_ADJUST2] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)           	, ENCODER_CCW_CW(_______, _______) }
+  [_BASE2]   = { ENCODER_CCW_CW(LCTL(KC_PGDN), LCTL(KC_PGUP)), ENCODER_CCW_CW(LCTL(KC_VOLD), LCTL(KC_VOLU)), ENCODER_CCW_CW(KC_WH_D, KC_WH_U) },
+  [_LOWER]   = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) },
+  [_LOWER]   = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) },
+  [_ADJUST]  = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) },
+  [_ADJUST2] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) }
 };
+#endif
+
+#ifdef OS_DETECTION_ENABLE
+void keyboard_post_init_user(void) {
+  wait_ms(400);
+
+  switch (detected_host_os()) {
+    case OS_MACOS:
+    case OS_IOS:
+      layer_move(_MAC);
+      break;
+
+    case OS_WINDOWS:
+    case OS_LINUX:
+    default:
+      layer_move(_WIN);
+      break;
+  }
+}
 #endif
 

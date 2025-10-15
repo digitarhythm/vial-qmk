@@ -22,11 +22,6 @@
 
 /* Select hand configuration */
 
-#define TAPPING_TERM 150
-#define HOLD_ON_OTHER_KEY_PRESS
-#define TAPPING_FORCE_HOLD
-//#define RETRO_TAPPING
-
 #ifdef RGBLED_NUM
   #undef RGBLED_NUM
 #endif

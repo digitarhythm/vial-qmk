@@ -133,10 +133,10 @@ led_config_t g_led_config = {
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
   [_BASE]    = { ENCODER_CCW_CW(LCTL(KC_PGUP), LCTL(KC_PGDN)), ENCODER_CCW_CW(KC_WH_D, KC_WH_U), ENCODER_CCW_CW(LCTL(KC_VOLD), LCTL(KC_VOLU)) },
   [_BASE2]   = { ENCODER_CCW_CW(LCTL(KC_PGUP), LCTL(KC_PGDN)), ENCODER_CCW_CW(KC_WH_D, KC_WH_U), ENCODER_CCW_CW(LCTL(KC_VOLD), LCTL(KC_VOLU)) },
-  [_LOWER]   = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) },
-  [_LOWER]   = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) },
-  [_ADJUST]  = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) },
-  [_ADJUST2] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) }
+  [_LOWER]   = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______) },
+  [_LOWER]   = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______) },
+  [_ADJUST]  = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______) },
+  [_ADJUST2] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______) }
 };
 #endif
 
@@ -145,16 +145,17 @@ void keyboard_post_init_user(void) {
   wait_ms(400);
 
   switch (detected_host_os()) {
-    case OS_MACOS:
-    case OS_IOS:
-      layer_move(_MAC);
-      break;
-
     case OS_WINDOWS:
     case OS_LINUX:
-    default:
       layer_move(_WIN);
+      break;
+
+    case OS_MACOS:
+    case OS_IOS:
+    default:
+      layer_move(_MAC);
       break;
   }
 }
 #endif
+

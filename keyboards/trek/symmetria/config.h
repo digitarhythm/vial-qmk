@@ -3,7 +3,7 @@
 
 #pragma once
 
-#define MATRIX_ROWS 10
+#define MATRIX_ROWS 8
 #define MATRIX_COLS 7
 
 #define DEBOUNCE 50

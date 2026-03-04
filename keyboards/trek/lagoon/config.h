@@ -7,3 +7,6 @@
 #define MATRIX_COLS 6
 
 #define DEBOUNCE 50
+
+#define DYNAMIC_KEYMAP_LAYER_COUNT 6
+#define LAYER_STATE_8BIT

@@ -3,12 +3,21 @@
 
 #include QMK_KEYBOARD_H
 
+#ifdef OS_DETECTION_ENABLE
+  #include "os_detection.h"
+#endif
+
 #define _BASE    0
 #define _BASE2   1
 #define _LOWER   2
 #define _RAISE   3
 #define _ADJUST  4
 #define _ADJUST2 5
+
+enum {
+  _MAC,
+  _WIN
+} os_layer_num;
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT(

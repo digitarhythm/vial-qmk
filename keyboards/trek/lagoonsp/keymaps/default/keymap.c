@@ -3,6 +3,10 @@
 
 #include QMK_KEYBOARD_H
 
+#ifdef OS_DETECTION_ENABLE
+  #include "os_detection.h"
+#endif
+
 #define _BASE    0
 #define _BASE2   1
 #define _LOWER   2

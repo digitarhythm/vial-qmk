@@ -14,18 +14,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
-#define VIAL_KEYBOARD_UID {0xA0, 0xF4, 0x5B, 0xC6, 0x12, 0x94, 0x05, 0x19}
-#define VIAL_UNLOCK_COMBO_ROWS { 0, 0 }
+#define VIAL_KEYBOARD_UID {0x09, 0x6F, 0xB2, 0xDB, 0x05, 0xD5, 0xE7, 0xAC}
 #define VIAL_UNLOCK_COMBO_COLS { 0, 1 }
-
-// JS-16 接続ピン
-#define JOYSTICK_X_PIN GP28
-#define JOYSTICK_Y_PIN GP29
-
-#define JOYSTICK_ADC_Y_MAX 784
+#define VIAL_UNLOCK_COMBO_ROWS { 0, 2 }
 
 /* Select hand configuration */
 
@@ -33,7 +26,7 @@
   #undef RGBLED_NUM
 #endif
 
-#define RGB_MATRIX_LED_COUNT 54
+#define RGB_MATRIX_LED_COUNT 65
 
 #ifdef RGB_MATRIX_ENABLE
   #define RGB_DISABLE_WHEN_USB_SUSPENDED
@@ -92,21 +85,23 @@
 #endif
 
 #define LAYOUT( \
-  k00, k01, k02, k03, k04, k05,       k07,       k41, k42, k43, k44, k45, k46, \
-  k10, k11, k12, k13, k14, k15,  k06, k17, k40,  k51, k52, k53, k54, k55, k56, \
-  k20, k21, k22, k23, k24, k25,  k16, k27, k50,  k61, k62, k63, k64, k65, k66, \
-  k30,      k31, k33, k35,       k26, k37, k60,       k72, k73, k75,      k76, \
-                                 k36, k70, k71                                 \
+       k01, k02, k03, k04, k05, k06, k50, k51, k52, k53,      k55, k56, k57, \
+  k10, k11, k12, k13, k14, k15, k16, k60, k61, k62, k63, k64, k65, k66, k67, \
+  k20, k21, k22, k23, k24, k25, k26, k70, k71, k72, k73, k74, k75, k76, k77, \
+  k30, k31, k32, k33, k34, k35, k36, k80, k81, k82, k83,      k85, k86, k87, \
+  k40,      k42, k43, k44,      k46, k90, k91,           k94, k95, k96, k97  \
 ) \
 { \
-  {   k00,   k01,   k02,   k03,   k04,   k05,   k06,   k07 }, \
-  {   k10,   k11,   k12,   k13,   k14,   k15,   k16,   k17 }, \
-  {   k20,   k21,   k22,   k23,   k24,   k25,   k26,   k27 }, \
-  {   k30,   k31, KC_NO,   k33, KC_NO,   k35,   k36,   k37 }, \
+  { KC_NO,   k01,   k02,   k03,   k04,   k05,   k06, KC_NO }, \
+  {   k10,   k11,   k12,   k13,   k14,   k15,   k16, KC_NO }, \
+  {   k20,   k21,   k22,   k23,   k24,   k25,   k26, KC_NO }, \
+  {   k30,   k31,   k32,   k33,   k34,   k35,   k36, KC_NO }, \
+  {   k40, KC_NO,   k42,   k43,   k44, KC_NO,   k46, KC_NO }, \
 \
-  {   k40,   k41,   k42,   k43,   k44,   k45,   k46, KC_NO }, \
-  {   k50,   k51,   k52,   k53,   k54,   k55,   k56, KC_NO }, \
-  {   k60,   k61,   k62,   k63,   k64,   k65,   k66, KC_NO }, \
-  {   k70,   k71,   k72,   k73, KC_NO,   k75,   k76, KC_NO }  \
+  {   k50,   k51,   k52,   k53, KC_NO,   k55,   k56,   k57 }, \
+  {   k60,   k61,   k62,   k63,   k64,   k65,   k66,   k67 }, \
+  {   k70,   k71,   k72,   k73,   k74,   k75,   k76,   k77 }, \
+  {   k80,   k81,   k82,   k83, KC_NO,   k85,   k86,   k87 }, \
+  {   k90,   k91, KC_NO, KC_NO,   k94,   k95,   k96,   k97 }  \
 }
 

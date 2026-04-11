@@ -1,0 +1,1 @@
+../../../../qmk_analog_stick/qmk_analog_stick.h

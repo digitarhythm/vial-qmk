@@ -18,7 +18,7 @@
 
 #define VIAL_KEYBOARD_UID {0x09, 0x6F, 0xB2, 0xDB, 0x05, 0xD5, 0xE7, 0xAC}
 #define VIAL_UNLOCK_COMBO_COLS { 0, 1 }
-#define VIAL_UNLOCK_COMBO_ROWS { 0, 2 }
+#define VIAL_UNLOCK_COMBO_ROWS { 1, 1 }
 
 /* Select hand configuration */
 

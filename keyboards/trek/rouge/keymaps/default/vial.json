@@ -1,4 +1,9 @@
 {
+  "customKeycodes": [
+    {"name": "Calib Start", "title": "Joystick Calibration Start", "shortName": "CLB_S"},
+    {"name": "Calib End",   "title": "Joystick Calibration End",   "shortName": "CLB_E"},
+    {"name": "Calib Reset", "title": "Joystick Calibration Reset", "shortName": "CLB_R"}
+  ],
   "lighting": "none",
   "matrix": {
     "rows": 4,

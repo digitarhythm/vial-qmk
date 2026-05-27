@@ -18,12 +18,8 @@
 #pragma once
 
 #define VIAL_KEYBOARD_UID {0xE5, 0xEB, 0xD8, 0x0F, 0x77, 0x06, 0x13, 0x2C}
-#define VIAL_UNLOCK_COMBO_ROWS { 0, 0 }
-#define VIAL_UNLOCK_COMBO_COLS { 0, 1 }
-
-// JS-16 接続ピン
-#define JOYSTICK_X_PIN GP28
-#define JOYSTICK_Y_PIN GP29
+#define VIAL_UNLOCK_COMBO_COLS { 1, 3 }
+#define VIAL_UNLOCK_COMBO_ROWS { 3, 3 }
 
 /* Select hand configuration */
 

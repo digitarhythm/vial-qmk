@@ -3,11 +3,8 @@
 
 #pragma once
 
-#define MATRIX_ROWS 4
+#define MATRIX_ROWS 5
 #define MATRIX_COLS 5
-
-#define JOYSTICK_X_PIN GP28
-#define JOYSTICK_Y_PIN GP29
 
 #define DEBOUNCE 50
 

@@ -3,34 +3,64 @@
 
 #include QMK_KEYBOARD_H
 
+#ifdef OS_DETECTION_ENABLE
+#include "os_detection.h"
+#endif
+
+#define _BASE    0
+#define _BASE2   1
+#define _LOWER   2
+#define _RAISE   3
+#define _ADJUST  4
+#define _ADJUST2 5
+
+enum {
+  _MAC,
+  _WIN
+} os_layer_num;
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT(
-    LGUI(KC_D),   KC_MUTE,       KC_PMNS,      KC_PAST,       KC_PSLS,
-    LGUI(KC_Z), LSG(KC_Z),         KC_P7,        KC_P8,         KC_P9,
-                    TG(1),         KC_P4,        KC_P5,         KC_P6,
-                                   KC_P1,        KC_P2,         KC_P3,
-                                   KC_P0,      KC_PDOT, LT(2,KC_PPLS)
+    LGUI(KC_0),      KC_MUTE,      KC_ESC,       KC_ENT,       KC_BSPC,
+       KC_HOME,       KC_END,       KC_P7,        KC_P8,         KC_P9,
+            TG(1),                  KC_P4,        KC_P5,         KC_P6,
+                                    KC_P1,        KC_P2,         KC_P3,
+                                    KC_P0,      KC_PDOT, LT(2,KC_PPLS)
   ),
   [1] = LAYOUT(
-       _______,   _______,          KC_H,   LGUI(KC_Z),     LSG(KC_Z),
-       _______,   _______,        KC_ESC,         KC_X,       KC_BSPC,
-                    TG(1),          KC_D,         KC_M,          KC_R,
-                           LGUI(KC_SLSH),         KC_E,          KC_W,
-                                 KC_LGUI, LSFT_T(KC_V),        KC_ENT
+    LCTL(KC_0),      _______,     _______,      _______,       _______,
+       _______,      _______,     _______,      _______,       _______,
+            TG(1),                _______,      _______,       _______,
+                                  _______,      _______,       _______,
+                                  _______,      _______,       _______
   ),
   [2] = LAYOUT(
-       _______,   _______,       RGB_MOD,     RGB_RMOD,       RGB_TOG,
-       _______,   _______,       RGB_SPD,      RGB_SPI,       _______,
-                  _______,       RGB_VAD,      RGB_VAI,       _______,
-                                 RGB_HUD,      RGB_HUI,       _______,
-                                 RGB_SAD,      RGB_SAI,       _______
+       _______,      _______,     _______,      _______,       _______,
+       _______,      _______,     _______,      _______,       _______,
+          _______,                _______,      _______,       _______,
+                                  _______,        KC_UP,       _______,
+                                  KC_LEFT,      KC_DOWN,      KC_RIGHT
   ),
   [3] = LAYOUT(
-       _______,   _______,       _______,      _______,       _______,
-       _______,   _______,       _______,      _______,       _______,
-                  _______,       _______,      _______,       _______,
-                                 _______,      _______,       _______,
-                                 _______,      _______,       _______
+       _______,      _______,     _______,      _______,       _______,
+       _______,      _______,     _______,      _______,       _______,
+          _______,                _______,      _______,       _______,
+                                  _______,      _______,       _______,
+                                  _______,      _______,       _______
+  ),
+  [4] = LAYOUT(
+       _______,      _______,     RGB_MOD,     RGB_RMOD,       RGB_TOG,
+       _______,      _______,     RGB_SPD,      RGB_SPI,       _______,
+          _______,                RGB_VAD,      RGB_VAI,       _______,
+                                  RGB_HUD,      RGB_HUI,       _______,
+                                  RGB_SAD,      RGB_SAI,       _______
+  ),
+  [5] = LAYOUT(
+       _______,      _______,        KC_H,   LGUI(KC_Z),     LSG(KC_Z),
+       _______,      _______,      KC_ESC,         KC_X,       KC_BSPC,
+            TG(1),                   KC_D,         KC_M,          KC_R,
+                            LGUI(KC_SLSH),         KC_E,          KC_W,
+                                  KC_LGUI, LSFT_T(KC_V),        KC_ENT
   )
 };
 
@@ -59,10 +89,29 @@ led_config_t g_led_config = {
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-/* layer 0 */    [0] = { ENCODER_CCW_CW(LGUI(KC_MINS), LGUI(KC_PLUS)), ENCODER_CCW_CW(KC_WH_D, KC_WH_U),  ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-/* layer 1 */    [1] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______) },
-/* layer 2 */    [2] = { ENCODER_CCW_CW(RGB_VAD, RGB_VAI),             ENCODER_CCW_CW(RGB_RMOD, RGB_MOD), ENCODER_CCW_CW(_______, _______) },
-/* layer 3 */    [3] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______) }
+  [_BASE]    = { ENCODER_CCW_CW(LGUI(KC_MINS), LGUI(KC_PLUS)), ENCODER_CCW_CW(KC_VOLD, KC_VOLU),  ENCODER_CCW_CW(KC_WH_D, KC_WH_U) },
+  [_BASE2]   = { ENCODER_CCW_CW(LCTL(KC_MINS), LCTL(KC_PLUS)), ENCODER_CCW_CW(KC_VOLU, KC_VOLD),  ENCODER_CCW_CW(KC_WH_U, KC_WH_D) },
+  [_LOWER]   = { ENCODER_CCW_CW(RGB_VAD, RGB_VAI),             ENCODER_CCW_CW(RGB_RMOD, RGB_MOD), ENCODER_CCW_CW(_______, _______) },
+  [_RAISE]   = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______) },
+  [_ADJUST]  = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______) },
+  [_ADJUST2] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______),  ENCODER_CCW_CW(_______, _______) }
 };
 #endif
+
+void keyboard_post_init_user(void) {
+#ifdef OS_DETECTION_ENABLE
+    wait_ms(400);
+    switch (detected_host_os()) {
+        case OS_WINDOWS:
+        case OS_LINUX:
+            layer_move(_WIN);
+            break;
+        case OS_MACOS:
+        case OS_IOS:
+        default:
+            layer_move(_MAC);
+            break;
+    }
+#endif
+}
 

@@ -19,6 +19,12 @@ enum {
   _WIN
 } os_layer_num;
 
+enum custom_keycodes {
+    JS_CALIB_START = SAFE_RANGE,  // キャリブレーション開始
+    JS_CALIB_END,                 // キャリブレーション終了・保存
+    JS_CALIB_RESET,               // キャリブレーションデータを消去
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT(
   //|---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------|
@@ -159,6 +165,23 @@ void keyboard_post_init_user(void) {
 #endif
 
     analog_stick_init();
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (record->event.pressed) {
+        switch (keycode) {
+            case JS_CALIB_START:
+                analog_stick_calibration_start();
+                return false;
+            case JS_CALIB_END:
+                analog_stick_calibration_end();
+                return false;
+            case JS_CALIB_RESET:
+                analog_stick_calibration_reset();
+                return false;
+        }
+    }
+    return true;
 }
 
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {

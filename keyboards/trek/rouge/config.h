@@ -23,3 +23,6 @@
 #define DYNAMIC_KEYMAP_LAYER_COUNT 6
 #define LAYER_STATE_8BIT
 
+// analog stick キャリブレーション用に VIA custom config 領域を確保
+#define VIA_EEPROM_CUSTOM_CONFIG_SIZE 10
+

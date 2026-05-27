@@ -80,7 +80,7 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 
 void keyboard_post_init_user(void) {
 #ifdef OS_DETECTION_ENABLE
-    wait_ms(400);
+    wait_ms(100);
     switch (detected_host_os()) {
         case OS_WINDOWS:
         case OS_LINUX:

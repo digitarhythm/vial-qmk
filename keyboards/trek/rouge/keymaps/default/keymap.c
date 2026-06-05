@@ -28,8 +28,8 @@ enum custom_keycodes {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT(
-            _______,        _______,     RGUI(KC_0),        KC_MUTE,        _______,
             _______,        _______,        _______,        _______,        _______,
+            _______,        MS_BTN1,        MS_BTN2,        _______,        _______,
             _______,        _______,        _______,        _______,        _______,
             _______,        _______,        _______,        _______,        _______
   ),
@@ -67,12 +67,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-  [_BASE]    = { ENCODER_CCW_CW(     LGUI(KC_Z),     SGUI(KC_Z)), ENCODER_CCW_CW(  RGUI(KC_PLUS),  RGUI(KC_MINS)), ENCODER_CCW_CW(        KC_VOLD,        KC_VOLU),
-  [_BASE2]   = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______),
-  [_LOWER]   = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______),
-  [_RAISE]   = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______),
-  [_ADJUST]  = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______),
-  [_ADJUST2] = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______)
+  [_BASE]    = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______) },
+  [_BASE2]   = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______) },
+  [_LOWER]   = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______) },
+  [_RAISE]   = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______) },
+  [_ADJUST]  = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______) },
+  [_ADJUST2] = { ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______), ENCODER_CCW_CW(        _______,        _______) }
 };
 #endif
 
@@ -114,26 +114,50 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
-#define SCROLL_SPEED_DIV 2048
+// スクロール蓄積を8ms（125Hz）ごとに更新する
+// カーソル移動はこの制限を受けない
+#define SCROLL_INTERVAL_MS 8
+// 正規化傾き量（-1000〜+1000）をスクロール量に変換する除数
+// 大きくすると遅く、小さくすると速くなる
+#define SCROLL_SPEED_DIV 6000
+// スクロール速度の上限（1〜1000）: 全倒しでもこの値以上の速度にならない
+// 小さくするほどスクロールの最高速が下がる
+#define SCROLL_MAX_SPEED 600
 
-static int16_t scroll_accum_h = 0;
-static int16_t scroll_accum_v = 0;
+static int32_t  scroll_accum_h = 0;
+static int32_t  scroll_accum_v = 0;
+static uint16_t scroll_timer   = 0;
 
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
-    mouse_report = analog_stick_update(mouse_report);
-
     if (IS_LAYER_ON(_ADJUST2)) {
-        scroll_accum_h += mouse_report.x;
-        scroll_accum_v -= mouse_report.y;
+        // スクロールモード: 加速なしの正規化傾き量を使用
+        // 蓄積は8msごと、スムージングは毎サイクル更新
+        int16_t stick_x, stick_y;
+        analog_stick_get_scroll_values(&stick_x, &stick_y);
+
+        if (stick_x >  SCROLL_MAX_SPEED) stick_x =  SCROLL_MAX_SPEED;
+        if (stick_x < -SCROLL_MAX_SPEED) stick_x = -SCROLL_MAX_SPEED;
+        if (stick_y >  SCROLL_MAX_SPEED) stick_y =  SCROLL_MAX_SPEED;
+        if (stick_y < -SCROLL_MAX_SPEED) stick_y = -SCROLL_MAX_SPEED;
+
+        if (timer_elapsed(scroll_timer) >= SCROLL_INTERVAL_MS) {
+            scroll_timer = timer_read();
+            scroll_accum_h += stick_x;
+            scroll_accum_v -= stick_y;
+        }
+
         mouse_report.x = 0;
         mouse_report.y = 0;
-        mouse_report.h = scroll_accum_h / SCROLL_SPEED_DIV;
-        mouse_report.v = scroll_accum_v / SCROLL_SPEED_DIV;
+        mouse_report.h = (int8_t)(scroll_accum_h / SCROLL_SPEED_DIV);
+        mouse_report.v = (int8_t)(scroll_accum_v / SCROLL_SPEED_DIV);
         scroll_accum_h %= SCROLL_SPEED_DIV;
         scroll_accum_v %= SCROLL_SPEED_DIV;
     } else {
+        // カーソルモード: 加速カーブあり（レート制限なし）
+        mouse_report = analog_stick_update(mouse_report);
         scroll_accum_h = 0;
         scroll_accum_v = 0;
+        scroll_timer   = timer_read();
     }
 
     return mouse_report;

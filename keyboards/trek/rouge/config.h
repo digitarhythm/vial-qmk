@@ -11,8 +11,8 @@
 
 #define DEBOUNCE 50
 
-#define BOOTMAGIC_ROW 0
-#define BOOTMAGIC_COLUMN 0
+#define BOOTMAGIC_ROW 3
+#define BOOTMAGIC_COLUMN 2
 
 #define TAPPING_TERM 200
 //#define PERMISSIVE_HOLD
@@ -25,4 +25,5 @@
 
 // analog stick キャリブレーション用に VIA custom config 領域を確保
 #define VIA_EEPROM_CUSTOM_CONFIG_SIZE 10
+
 

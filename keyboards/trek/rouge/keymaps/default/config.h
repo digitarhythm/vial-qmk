@@ -21,6 +21,8 @@
 #define VIAL_UNLOCK_COMBO_COLS { 1, 3 }
 #define VIAL_UNLOCK_COMBO_ROWS { 3, 3 }
 
+#define HOLD_ON_OTHER_KEY_PRESS
+
 // VIA custom config 領域の先頭アドレス
 // = EECONFIG_SIZE(37) + VIA_MAGIC(3) + VIA_LAYOUT_OPTIONS(1) = 41
 #define JOYSTICK_CALIB_EEPROM_ADDR 41

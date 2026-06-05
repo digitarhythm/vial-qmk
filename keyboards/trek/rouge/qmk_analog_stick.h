@@ -109,6 +109,11 @@
 // ウォームアップ待機 → 中心キャリブレーション → EEPROM 読み込み を実行
 void analog_stick_init(void);
 
+// スクロールモード用: 加速カーブなしの正規化傾き量を返す
+// out_x, out_y: -1000〜+1000（デッドゾーン処理済み、加速なし）
+// 加速状態もリセットするため、スクロールモード中は analog_stick_update() の代わりにこちらを呼ぶ
+void analog_stick_get_scroll_values(int16_t *out_x, int16_t *out_y);
+
 // マウスレポート更新（pointing_device_task_user 内で呼ぶ）
 // スムージング、デッドゾーン、加速カーブ、サブピクセル処理を適用
 report_mouse_t analog_stick_update(report_mouse_t mouse_report);

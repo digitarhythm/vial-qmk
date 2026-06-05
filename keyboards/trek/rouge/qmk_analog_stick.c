@@ -14,11 +14,11 @@
 #define CALIB_MAGIC  0xA55A
 
 // EEPROM レイアウト（各 2 バイト, 計 10 バイト）
-#define EEPROM_ADDR_MAGIC  ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 0))
-#define EEPROM_ADDR_X_MIN  ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 2))
-#define EEPROM_ADDR_X_MAX  ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 4))
-#define EEPROM_ADDR_Y_MIN  ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 6))
-#define EEPROM_ADDR_Y_MAX  ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 8))
+#define EEPROM_ADDR_MAGIC ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 0))
+#define EEPROM_ADDR_X_MIN ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 2))
+#define EEPROM_ADDR_X_MAX ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 4))
+#define EEPROM_ADDR_Y_MIN ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 6))
+#define EEPROM_ADDR_Y_MAX ((uint16_t *)(uintptr_t)(JOYSTICK_CALIB_EEPROM_ADDR + 8))
 
 static uint16_t center_x = 512;
 static uint16_t center_y = 512;
@@ -77,6 +77,7 @@ static void load_calibration(void) {
                 runtime_x_min, runtime_x_max, runtime_y_min, runtime_y_max);
 #endif
     }
+
 }
 
 static uint16_t read_smoothed(pin_t pin, uint16_t *buf) {
@@ -313,4 +314,40 @@ void analog_stick_calibration_reset(void) {
 
 bool analog_stick_is_calibrating(void) {
     return is_calibrating;
+}
+
+void analog_stick_get_scroll_values(int16_t *out_x, int16_t *out_y) {
+    uint16_t smooth_x = read_smoothed(JOYSTICK_X_PIN, buf_x);
+    uint16_t smooth_y = read_smoothed(JOYSTICK_Y_PIN, buf_y);
+    buf_idx = (buf_idx + 1) % JOYSTICK_SMOOTHING;
+
+    int16_t norm_x = normalize_axis(smooth_x, center_x, runtime_x_min, runtime_x_max);
+    int16_t norm_y = normalize_axis(smooth_y, center_y, runtime_y_min, runtime_y_max);
+
+    uint32_t magnitude = isqrt((uint32_t)((int32_t)norm_x * norm_x + (int32_t)norm_y * norm_y));
+    if (magnitude > 1000) magnitude = 1000;
+
+    uint32_t adc_half_range = ((uint32_t)(runtime_x_max - runtime_x_min) +
+                               (uint32_t)(runtime_y_max - runtime_y_min)) / 4;
+    if (adc_half_range < 1) adc_half_range = 1;
+    uint32_t deadzone_normalized = (uint32_t)JOYSTICK_DEADZONE * 1000 / adc_half_range;
+
+    if (magnitude <= deadzone_normalized) {
+        *out_x = 0;
+        *out_y = 0;
+    } else {
+        int32_t effective     = (int32_t)magnitude - (int32_t)deadzone_normalized;
+        int32_t effective_max = 1000 - (int32_t)deadzone_normalized;
+        if (effective_max < 1) effective_max = 1;
+        int32_t scale = effective * 1000 / effective_max;
+        int32_t mag   = (int32_t)(magnitude > 0 ? magnitude : 1);
+        *out_x = (int16_t)((int32_t)norm_x * scale / mag);
+        *out_y = (int16_t)((int32_t)norm_y * scale / mag);
+    }
+
+    // カーソルモードに戻ったとき跳ばないよう加速状態をリセット
+    current_speed = 0;
+    accel_accum   = 0;
+    subpx_x       = 0;
+    subpx_y       = 0;
 }

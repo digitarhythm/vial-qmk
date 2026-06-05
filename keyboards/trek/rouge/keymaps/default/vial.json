@@ -12,22 +12,23 @@
   "layouts": {
     "keymap": [
       [
+        {
+          "x": 1.75
+        },
         "0,0\n\n\n\n\n\n\n\n\ne",
-        "0,1\n\n\n\n\n\n\n\n\ne",
-        {
-          "x": 0.25
-        },
         "1,0\n\n\n\n\n\n\n\n\ne",
-        "1,1\n\n\n\n\n\n\n\n\ne",
+        "2,0\n\n\n\n\n\n\n\n\ne"
+      ],
+      [
         {
-          "x": 0.25
+          "x": 1.75
         },
-        "2,0\n\n\n\n\n\n\n\n\ne",
+        "0,1\n\n\n\n\n\n\n\n\ne",
+        "1,1\n\n\n\n\n\n\n\n\ne",
         "2,1\n\n\n\n\n\n\n\n\ne"
       ],
       [
         {
-          "y": 0.25,
           "x": 0.75
         },
         "0,0",

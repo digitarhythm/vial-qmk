@@ -79,8 +79,10 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #include "qmk_analog_stick.h"
 
 void keyboard_post_init_user(void) {
+    analog_stick_init();
+
 #ifdef OS_DETECTION_ENABLE
-    wait_ms(100);
+    //wait_ms(100);
     switch (detected_host_os()) {
         case OS_WINDOWS:
         case OS_LINUX:
@@ -93,8 +95,6 @@ void keyboard_post_init_user(void) {
             break;
     }
 #endif
-
-    analog_stick_init();
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {

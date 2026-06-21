@@ -26,6 +26,7 @@ enum custom_keycodes {
     JS_CALIB_RESET                // EEPROM 消去・デフォルト値に戻す
 };
 
+/*
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
         _______, _______, _______, _______, _______, 
@@ -75,6 +76,63 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
   [_ADJUST2] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS) }
 };
 
+#endif
+
+enum custom_keycodes {
+    Calib Start = QK_KB_0,
+    Calib End,
+    Calib Reset,
+};
+*/
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+    [0] = LAYOUT(
+        KC_ESC,  KC_BTN1,        LGUI(KC_0),     KC_MUTE,       LGUI(KC_C),
+        MO(2),   KC_BTN1,        KC_BTN2,        KC_WH_U,       LGUI(KC_V),
+        MO(5),   LGUI(KC_LBRC),  LGUI(KC_RBRC),  KC_WH_D,       KC_F3,
+        KC_SPC,  SGUI(KC_LBRC),  TG(1),          SGUI(KC_RBRC), KC_ENT
+    ),
+    [1] = LAYOUT(
+        KC_TRNS, KC_TRNS,        LCTL(KC_0),     KC_TRNS,       LCTL(KC_C),
+        MO(3),   KC_TRNS,        KC_TRNS,        KC_TRNS,       LCTL(KC_V),
+        MO(5),   LALT(KC_LEFT),  LALT(KC_RGHT),  KC_TRNS,       KC_TRNS,
+        KC_TRNS, LCTL(KC_PGUP),  KC_TRNS,        RCTL(KC_PGDN), KC_TRNS
+    ),
+    [2] = LAYOUT(
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_TRNS,
+        KC_TRNS, KC_LEFT,        KC_RGHT,        KC_PGUP,       MO(4),
+        KC_TRNS, LSFT(KC_COMM),  LSFT(KC_DOT),   KC_PGDN,       SGUI(KC_R),
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_F,          LGUI(KC_W)
+    ),
+    [3] = LAYOUT(
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_TRNS,
+        KC_TRNS, KC_LEFT,        KC_RGHT,        KC_PGUP,       MO(4),
+        KC_TRNS, LSFT(KC_COMM),  LSFT(KC_DOT),   KC_PGDN,       0x0315,
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_F,          LCTL(KC_W)
+    ),
+    [4] = LAYOUT(
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_TRNS,
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_TRNS,
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_TRNS,
+        KC_TRNS, KC_TRNS,        QK_BOOT,        KC_TRNS,       KC_TRNS
+    ),
+    [5] = LAYOUT(
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_TRNS,
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_HOME,
+        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_END,
+        KC_TRNS, JS_CALIB_START, JS_CALIB_RESET, JS_CALIB_END,  KC_TRNS
+    ),
+};
+
+#if defined(ENCODER_MAP_ENABLE)
+const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
+    [0] = { ENCODER_CCW_CW(KC_WH_D, KC_WH_U), ENCODER_CCW_CW(LGUI(KC_EQL), LGUI(KC_MINS)), ENCODER_CCW_CW(KC_VOLU, KC_VOLD) },
+    [1] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(LCTL(KC_EQL), LCTL(KC_MINS)), ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+    [2] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+    [3] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+    [4] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+    [5] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+};
 #endif
 
 #include "qmk_analog_stick.h"

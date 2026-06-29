@@ -20,24 +20,18 @@ enum {
   _WIN
 } os_layer_num;
 
-enum custom_keycodes {
-    JS_CALIB_START = SAFE_RANGE,  // キャリブレーション開始
-    JS_CALIB_END,                 // キャリブレーション終了・EEPROM 保存
-    JS_CALIB_RESET                // EEPROM 消去・デフォルト値に戻す
-};
-
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
-        KC_ESC,  KC_BTN1,        LGUI(KC_0),     KC_MUTE,       LGUI(KC_C),
-        MO(2),   KC_BTN1,        KC_BTN2,        KC_WH_U,       LGUI(KC_V),
+        KC_ESC,  KC_BTN1,        LGUI(KC_0),     KC_MUTE,       0x0909,
+        MO(2),   KC_BTN1,        KC_BTN2,        KC_WH_U,       LGUI(KC_H),
         MO(5),   LGUI(KC_LBRC),  LGUI(KC_RBRC),  KC_WH_D,       KC_F3,
         KC_ENT,  SGUI(KC_LBRC),  TG(1),          SGUI(KC_RBRC), LGUI(KC_TAB)
     ),
     [1] = LAYOUT(
-        KC_TRNS, KC_TRNS,        LCTL(KC_0),     KC_TRNS,       LCTL(KC_C),
-        MO(3),   KC_TRNS,        KC_TRNS,        KC_TRNS,       LCTL(KC_V),
+        KC_TRNS, KC_TRNS,        LCTL(KC_0),     KC_TRNS,       LGUI(KC_UP),
+        MO(3),   KC_TRNS,        KC_TRNS,        KC_TRNS,       LGUI(KC_DOWN),
         MO(5),   LALT(KC_LEFT),  LALT(KC_RGHT),  KC_TRNS,       LGUI(KC_TAB),
-        KC_TRNS, LCTL(KC_PGUP),  KC_TRNS,        RCTL(KC_PGDN), LGUI(KC_TAB)
+        KC_TRNS, LCTL(KC_PGUP),  KC_TRNS,        RCTL(KC_PGDN), LCTL(KC_TAB)
     ),
     [2] = LAYOUT(
         KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_TRNS,
@@ -58,16 +52,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TRNS, KC_TRNS,        QK_BOOT,        KC_TRNS,       KC_TRNS
     ),
     [5] = LAYOUT(
-        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_TRNS,
-        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_HOME,
-        KC_TRNS, KC_TRNS,        KC_TRNS,        KC_TRNS,       KC_END,
-        KC_TRNS, JS_CALIB_START, JS_CALIB_RESET, JS_CALIB_END,  KC_TRNS
+        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+        KC_TRNS, KC_TRNS, KC_TRNS, KC_HOME, KC_TRNS,
+        KC_TRNS, KC_TRNS, KC_TRNS, KC_END,  KC_TRNS,
+        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS
     ),
 };
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [0] = { ENCODER_CCW_CW(KC_WH_D, KC_WH_U), ENCODER_CCW_CW(LGUI(KC_EQL), LGUI(KC_MINS)), ENCODER_CCW_CW(KC_VOLU, KC_VOLD) },
+    [0] = { ENCODER_CCW_CW(KC_WH_U, KC_WH_D), ENCODER_CCW_CW(LGUI(KC_EQL), LGUI(KC_MINS)), ENCODER_CCW_CW(KC_VOLU, KC_VOLD) },
     [1] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(LCTL(KC_EQL), LCTL(KC_MINS)), ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
     [2] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
     [3] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS), ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
@@ -95,23 +89,6 @@ void keyboard_post_init_user(void) {
             break;
     }
 #endif
-}
-
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (record->event.pressed) {
-        switch (keycode) {
-            case JS_CALIB_START:
-                analog_stick_calibration_start();
-                return false;
-            case JS_CALIB_END:
-                analog_stick_calibration_end();
-                return false;
-            case JS_CALIB_RESET:
-                analog_stick_calibration_reset();
-                return false;
-        }
-    }
-    return true;
 }
 
 // スクロール蓄積を8ms（125Hz）ごとに更新する

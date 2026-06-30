@@ -24,5 +24,6 @@
 #define LAYER_STATE_8BIT
 
 #define JH16
+#define JOYSTICK_DEADZONE 10
 
 

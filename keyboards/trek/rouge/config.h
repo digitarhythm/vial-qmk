@@ -25,5 +25,6 @@
 
 #define JH16
 #define JOYSTICK_DEADZONE 10
+#define JOYSTICK_CURVE_LOW_GAIN 500
 
 

@@ -7,6 +7,7 @@
 // 使い方:
 //   1. config.h で必須パラメータ（JOYSTICK_X_PIN, JOYSTICK_Y_PIN）を定義
 //   2. config.h でジョイスティックモデル（#define JH16 または #define JS16）を定義
+//      （省略すると自動レンジ学習モードで動作）
 //   3. config.h で任意のパラメータを上書き定義（デフォルト値あり）
 //   4. keymap.c で #include "qmk_analog_stick.h" する
 //   5. keyboard_post_init_user() 内で analog_stick_init() を呼ぶ
@@ -26,9 +27,14 @@
 // #define JOYSTICK_X_PIN GP28
 // #define JOYSTICK_Y_PIN GP29
 
-// ===== ジョイスティックモデル選択（config.h でいずれか一方を定義） =====
+// ===== ジョイスティックモデル選択（config.h で定義、省略可） =====
 // #define JH16   // X: 8〜1023 / Y: 8〜782
 // #define JS16   // X: 0〜1023 / Y: 0〜1023
+//
+// どちらも定義しない場合は「自動レンジ学習モード」になる:
+//   起動時に 中心±JOYSTICK_INITIAL_RANGE の控えめなレンジから開始し、
+//   スティックを倒すたびに実測値で ADC レンジを自動拡張する。
+//   数回全倒しすると実機のレンジに収束するため、モデルの区別が不要になる。
 
 // ADC レンジ（モデルに応じて決定、個別に上書きも可能）
 #if defined(JH16)
@@ -57,8 +63,36 @@
 #  ifndef JOYSTICK_ADC_Y_MAX
 #    define JOYSTICK_ADC_Y_MAX 1023
 #  endif
+#elif defined(JOYSTICK_ADC_X_MIN) && defined(JOYSTICK_ADC_X_MAX) && \
+      defined(JOYSTICK_ADC_Y_MIN) && defined(JOYSTICK_ADC_Y_MAX)
+// モデル未指定でも 4 つの ADC レンジが手動定義されていれば固定レンジで動作
 #else
-#  error "config.h に #define JH16 または #define JS16 を追加してください"
+// 自動レンジ学習モード
+#  define JOYSTICK_ADAPTIVE_RANGE 1
+// 自動学習の初期半レンジ（中心±この値から開始し、実測値で拡張される）
+// 実機の最小半レンジより小さい値にすること（大きいと最高速に到達できなくなる）
+#  ifndef JOYSTICK_INITIAL_RANGE
+#    define JOYSTICK_INITIAL_RANGE 250
+#  endif
+// 学習レンジの不揮発保存
+//   1: レンジ拡張が止まってから JOYSTICK_RANGE_SAVE_DELAY_MS 後に EEPROM へ保存し、
+//      次回起動時に初期レンジとして読み込む（起動ごとの再学習が不要になる）
+//   0: 保存しない（起動ごとに再学習）
+// VIA/Vial 環境ではカスタム設定領域を使用するため、config.h に
+//   #define VIA_EEPROM_CUSTOM_CONFIG_SIZE 10
+// の定義が必要。VIA 無効環境では JOYSTICK_EEPROM_ADDR を手動定義すること。
+#  ifndef JOYSTICK_RANGE_SAVE
+#    if defined(VIA_ENABLE) || defined(JOYSTICK_EEPROM_ADDR)
+#      define JOYSTICK_RANGE_SAVE 1
+#    else
+#      define JOYSTICK_RANGE_SAVE 0
+#    endif
+#  endif
+// レンジ拡張が止まってから保存するまでの待ち時間（ms）
+// スティックを回している間の細かい拡張を 1 回の書き込みにまとめる
+#  ifndef JOYSTICK_RANGE_SAVE_DELAY_MS
+#    define JOYSTICK_RANGE_SAVE_DELAY_MS 3000
+#  endif
 #endif
 
 // ===== オプションパラメータ（config.h で上書き可能） =====
@@ -88,6 +122,23 @@
 // 速度設定（x1000スケール: 1000 = 1.0ピクセル/サイクル）
 #ifndef JOYSTICK_MAX_SPEED
 #define JOYSTICK_MAX_SPEED  6000   // 最大速度（8.0）
+#endif
+
+// ===== ハイブリッド速度モード（config.h で JOYSTICK_ACCEL_THRESHOLD を定義すると有効） =====
+// 傾き量がしきい値以下: 傾きに比例した速度をそのまま出力（時間加速なし・即応答）
+//   → 倒し始めからしきい値までは緩やかに速度が変化する
+// 傾き量がしきい値超え: 超過分の二乗に比例した加速度で MAX_SPEED まで加速
+//   → 深く倒し込むと加速して素早く移動できる
+// このモード中は JOYSTICK_CURVE_POWER / JOYSTICK_CURVE_LOW_GAIN は使用されない
+// #define JOYSTICK_ACCEL_THRESHOLD 800   // しきい値（1〜999、80% = 800）
+#ifdef JOYSTICK_ACCEL_THRESHOLD
+#  if JOYSTICK_ACCEL_THRESHOLD < 1 || JOYSTICK_ACCEL_THRESHOLD > 999
+#    error "JOYSTICK_ACCEL_THRESHOLD は 1〜999 の範囲で定義してください"
+#  endif
+// 直接ゾーンの最高速（しきい値ちょうどの傾きでの速度、x1000スケール）
+#  ifndef JOYSTICK_DIRECT_SPEED
+#    define JOYSTICK_DIRECT_SPEED 2000
+#  endif
 #endif
 
 // 速度カーブの指数（傾き量→速度の変化曲線）

@@ -23,8 +23,18 @@
 #define DYNAMIC_KEYMAP_LAYER_COUNT 6
 #define LAYER_STATE_8BIT
 
-#define JH16
+// モデル未指定 → 自動レンジ学習モード
+//#define JH16
+
+// 学習レンジの EEPROM 保存用（VIA カスタム設定領域 10 バイトを予約）
+#define VIA_EEPROM_CUSTOM_CONFIG_SIZE 10
+
+// スティック中央のデッドゾーン
 #define JOYSTICK_DEADZONE 10
-#define JOYSTICK_CURVE_LOW_GAIN 100
 
+// ハイブリッド速度モード: 傾き80%までは比例速度、超えると加速
+#define JOYSTICK_ACCEL_THRESHOLD 900
+#define JOYSTICK_DIRECT_SPEED 600
 
+// ハイブリッド速度モード中は下記カーブ設定は使用されない
+//#define JOYSTICK_CURVE_LOW_GAIN 10

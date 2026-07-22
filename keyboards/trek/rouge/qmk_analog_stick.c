@@ -40,6 +40,85 @@ static uint16_t runtime_x_max;
 static uint16_t runtime_y_min;
 static uint16_t runtime_y_max;
 
+#ifdef JOYSTICK_ADAPTIVE_RANGE
+
+#if JOYSTICK_RANGE_SAVE
+#include "eeprom.h"
+#ifndef JOYSTICK_EEPROM_ADDR
+// VIA のカスタム設定領域を使用
+// config.h に VIA_EEPROM_CUSTOM_CONFIG_SIZE 10 の定義が必要
+#include "via.h"
+#include "quantum/nvm/eeprom/nvm_eeprom_eeconfig_internal.h"
+#include "quantum/nvm/eeprom/nvm_eeprom_via_internal.h"
+#define JOYSTICK_EEPROM_ADDR VIA_EEPROM_CUSTOM_CONFIG_ADDR
+// カスタム設定領域の予約が足りないと、この直後から始まる
+// ダイナミックキーマップ領域を侵食してしまうためコンパイル時に検出する
+STATIC_ASSERT(VIA_EEPROM_CUSTOM_CONFIG_SIZE >= 10,
+              "Define VIA_EEPROM_CUSTOM_CONFIG_SIZE >= 10 in config.h to reserve EEPROM space for the joystick range");
+#endif
+// 保存レイアウト: magic(2) + x_min(2) + x_max(2) + y_min(2) + y_max(2) = 10バイト
+#define JOYSTICK_RANGE_MAGIC 0xAD01
+
+static bool     range_dirty      = false;
+static uint16_t range_save_timer = 0;
+
+static void save_range(void) {
+    uint16_t *addr = (uint16_t *)(uintptr_t)JOYSTICK_EEPROM_ADDR;
+    eeprom_update_word(addr + 0, JOYSTICK_RANGE_MAGIC);
+    eeprom_update_word(addr + 1, runtime_x_min);
+    eeprom_update_word(addr + 2, runtime_x_max);
+    eeprom_update_word(addr + 3, runtime_y_min);
+    eeprom_update_word(addr + 4, runtime_y_max);
+#if JOYSTICK_DEBUG
+    uprintf("AnalogStick range saved: X=%u~%u Y=%u~%u\n",
+            runtime_x_min, runtime_x_max, runtime_y_min, runtime_y_max);
+#endif
+}
+
+// 保存済みレンジを読み込み、現在の初期レンジと統合する（広い方を採用）
+static void load_range(void) {
+    uint16_t *addr = (uint16_t *)(uintptr_t)JOYSTICK_EEPROM_ADDR;
+    if (eeprom_read_word(addr) != JOYSTICK_RANGE_MAGIC) return;
+
+    uint16_t x_min = eeprom_read_word(addr + 1);
+    uint16_t x_max = eeprom_read_word(addr + 2);
+    uint16_t y_min = eeprom_read_word(addr + 3);
+    uint16_t y_max = eeprom_read_word(addr + 4);
+
+    // 妥当性チェック: 現在の中心値がレンジ内に収まっていること
+    if (x_min < center_x && center_x < x_max && x_max <= 1023 &&
+        y_min < center_y && center_y < y_max && y_max <= 1023) {
+        if (x_min < runtime_x_min) runtime_x_min = x_min;
+        if (x_max > runtime_x_max) runtime_x_max = x_max;
+        if (y_min < runtime_y_min) runtime_y_min = y_min;
+        if (y_max > runtime_y_max) runtime_y_max = y_max;
+    }
+}
+#endif // JOYSTICK_RANGE_SAVE
+
+// 自動レンジ学習: 実測値（平滑化済み）がレンジ外に出たら拡張する
+// 拡張が止まって一定時間経過したら EEPROM へ保存（有効時）
+static void adapt_range(uint16_t smooth_x, uint16_t smooth_y) {
+    bool changed = false;
+    if (smooth_x < runtime_x_min) { runtime_x_min = smooth_x; changed = true; }
+    if (smooth_x > runtime_x_max) { runtime_x_max = smooth_x; changed = true; }
+    if (smooth_y < runtime_y_min) { runtime_y_min = smooth_y; changed = true; }
+    if (smooth_y > runtime_y_max) { runtime_y_max = smooth_y; changed = true; }
+
+#if JOYSTICK_RANGE_SAVE
+    if (changed) {
+        range_dirty      = true;
+        range_save_timer = timer_read();
+    } else if (range_dirty && timer_elapsed(range_save_timer) >= JOYSTICK_RANGE_SAVE_DELAY_MS) {
+        range_dirty = false;
+        save_range();
+    }
+#else
+    (void)changed;
+#endif
+}
+#endif
+
 static uint16_t read_smoothed(pin_t pin, uint16_t *buf) {
     buf[buf_idx] = analogReadPin(pin);
     uint32_t sum = 0;
@@ -120,11 +199,23 @@ void analog_stick_init(void) {
     setPinInputHigh(JOYSTICK_SW_PIN);
 #endif
 
+#ifdef JOYSTICK_ADAPTIVE_RANGE
+    // 自動レンジ学習: 中心±初期レンジから開始し、使用中に実測値で拡張
+    runtime_x_min = (center_x > JOYSTICK_INITIAL_RANGE) ? center_x - JOYSTICK_INITIAL_RANGE : 0;
+    runtime_x_max = (center_x + JOYSTICK_INITIAL_RANGE < 1023) ? center_x + JOYSTICK_INITIAL_RANGE : 1023;
+    runtime_y_min = (center_y > JOYSTICK_INITIAL_RANGE) ? center_y - JOYSTICK_INITIAL_RANGE : 0;
+    runtime_y_max = (center_y + JOYSTICK_INITIAL_RANGE < 1023) ? center_y + JOYSTICK_INITIAL_RANGE : 1023;
+#if JOYSTICK_RANGE_SAVE
+    // 前回保存した学習レンジがあれば初期値として読み込む
+    load_range();
+#endif
+#else
     // ADC レンジをモデル定数で設定
     runtime_x_min = JOYSTICK_ADC_X_MIN;
     runtime_x_max = JOYSTICK_ADC_X_MAX;
     runtime_y_min = JOYSTICK_ADC_Y_MIN;
     runtime_y_max = JOYSTICK_ADC_Y_MAX;
+#endif
 
 #if JOYSTICK_DEBUG
     uprintf("AnalogStick center: X=%u Y=%u\n", center_x, center_y);
@@ -137,6 +228,10 @@ report_mouse_t analog_stick_update(report_mouse_t mouse_report) {
     uint16_t smooth_x = read_smoothed(JOYSTICK_X_PIN, buf_x);
     uint16_t smooth_y = read_smoothed(JOYSTICK_Y_PIN, buf_y);
     buf_idx = (buf_idx + 1) % JOYSTICK_SMOOTHING;
+
+#ifdef JOYSTICK_ADAPTIVE_RANGE
+    adapt_range(smooth_x, smooth_y);
+#endif
 
     // 各軸を -1000〜+1000 に正規化
     int16_t norm_x = normalize_axis(smooth_x, center_x, runtime_x_min, runtime_x_max);
@@ -160,6 +255,31 @@ report_mouse_t analog_stick_update(report_mouse_t mouse_report) {
         uint32_t adjusted_magnitude = (uint32_t)effective * 1000 / effective_max;
         if (adjusted_magnitude > 1000) adjusted_magnitude = 1000;
 
+#ifdef JOYSTICK_ACCEL_THRESHOLD
+        if (adjusted_magnitude <= JOYSTICK_ACCEL_THRESHOLD) {
+            // 直接ゾーン: 傾き量に比例した速度をそのまま使用（時間加速なし）
+            int32_t target = (int32_t)adjusted_magnitude * JOYSTICK_DIRECT_SPEED / JOYSTICK_ACCEL_THRESHOLD;
+            if (current_speed > target) {
+                // 加速ゾーンから戻ったときは目標速度へ滑らかに減速
+                int32_t decel = (current_speed - target) * JOYSTICK_DECEL_RATE / 100;
+                if (decel < 1) decel = 1;
+                current_speed -= decel;
+                if (current_speed < target) current_speed = target;
+            } else {
+                current_speed = target;
+            }
+            accel_accum = 0;
+        } else {
+            // 加速ゾーン: しきい値超過分（0〜1000 に正規化）の二乗を加速度に変換
+            int32_t excess = (int32_t)(adjusted_magnitude - JOYSTICK_ACCEL_THRESHOLD) * 1000
+                             / (1000 - JOYSTICK_ACCEL_THRESHOLD);
+            accel_accum += excess * excess * JOYSTICK_ACCEL_RATE;
+            current_speed += accel_accum / 1000000;
+            accel_accum %= 1000000;
+            if (current_speed < JOYSTICK_DIRECT_SPEED) current_speed = JOYSTICK_DIRECT_SPEED;
+            if (current_speed > JOYSTICK_MAX_SPEED) current_speed = JOYSTICK_MAX_SPEED;
+        }
+#else
         // 現在の傾き量に基づく速度上限（JOYSTICK_CURVE_POWER 乗カーブ）
         int32_t curved = (int32_t)adjusted_magnitude;
         for (uint8_t p = 1; p < JOYSTICK_CURVE_POWER; p++) {
@@ -183,6 +303,7 @@ report_mouse_t analog_stick_update(report_mouse_t mouse_report) {
             if (current_speed < speed_limit) current_speed = speed_limit;
             accel_accum = 0;
         }
+#endif
 
         last_norm_x    = norm_x;
         last_norm_y    = norm_y;
@@ -243,6 +364,10 @@ void analog_stick_get_scroll_values(int16_t *out_x, int16_t *out_y) {
     uint16_t smooth_x = read_smoothed(JOYSTICK_X_PIN, buf_x);
     uint16_t smooth_y = read_smoothed(JOYSTICK_Y_PIN, buf_y);
     buf_idx = (buf_idx + 1) % JOYSTICK_SMOOTHING;
+
+#ifdef JOYSTICK_ADAPTIVE_RANGE
+    adapt_range(smooth_x, smooth_y);
+#endif
 
     int16_t norm_x = normalize_axis(smooth_x, center_x, runtime_x_min, runtime_x_max);
     int16_t norm_y = normalize_axis(smooth_y, center_y, runtime_y_min, runtime_y_max);

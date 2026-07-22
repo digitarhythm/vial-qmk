@@ -24,14 +24,14 @@ enum {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
         KC_ESC,  KC_BTN1,        LGUI(KC_0),     KC_MUTE,       0x0909,
-        MO(2),   KC_BTN1,        KC_BTN2,        KC_WH_U,       LGUI(KC_H),
-        MO(5),   LGUI(KC_LBRC),  LGUI(KC_RBRC),  KC_WH_D,       KC_F3,
+        MO(2),   KC_BTN1,        KC_BTN2,        KC_WH_D,       LGUI(KC_H),
+        MO(5),   LGUI(KC_LBRC),  LGUI(KC_RBRC),  KC_WH_U,       KC_F3,
         KC_ENT,  SGUI(KC_LBRC),  TG(1),          SGUI(KC_RBRC), LGUI(KC_TAB)
     ),
     [1] = LAYOUT(
         KC_TRNS, KC_TRNS,        LCTL(KC_0),     KC_TRNS,       LGUI(KC_UP),
-        MO(3),   KC_TRNS,        KC_TRNS,        KC_TRNS,       LGUI(KC_DOWN),
-        MO(5),   LALT(KC_LEFT),  LALT(KC_RGHT),  KC_TRNS,       LGUI(KC_TAB),
+        MO(3),   KC_TRNS,        KC_TRNS,        KC_WH_U,       LGUI(KC_DOWN),
+        MO(5),   LALT(KC_LEFT),  LALT(KC_RGHT),  KC_WH_D,       LGUI(KC_TAB),
         KC_TRNS, LCTL(KC_PGUP),  KC_TRNS,        RCTL(KC_PGDN), LCTL(KC_TAB)
     ),
     [2] = LAYOUT(

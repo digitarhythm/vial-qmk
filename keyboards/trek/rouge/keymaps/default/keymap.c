@@ -120,8 +120,9 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 
         if (timer_elapsed(scroll_timer) >= SCROLL_INTERVAL_MS) {
             scroll_timer = timer_read();
-            scroll_accum_h += stick_x;
-            scroll_accum_v += stick_y;
+            // 向き補正（JOYSTICK_ORIENTATION）適用後の値を反転してホイール方向を逆にする
+            scroll_accum_h -= stick_x;
+            scroll_accum_v -= stick_y;
         }
 
         mouse_report.x = 0;

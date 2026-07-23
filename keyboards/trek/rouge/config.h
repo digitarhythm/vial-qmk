@@ -30,7 +30,7 @@
 #define VIA_EEPROM_CUSTOM_CONFIG_SIZE 10
 
 // スティック中央のデッドゾーン
-#define JOYSTICK_DEADZONE 20
+#define JOYSTICK_DEADZONE 30
 
 // ハイブリッド速度モード: 傾き80%までは比例速度、超えると加速
 #define JOYSTICK_ACCEL_THRESHOLD 900

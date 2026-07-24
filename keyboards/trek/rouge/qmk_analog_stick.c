@@ -258,7 +258,7 @@ report_mouse_t analog_stick_update(report_mouse_t mouse_report) {
         uint32_t adjusted_magnitude = (uint32_t)effective * 1000 / effective_max;
         if (adjusted_magnitude > 1000) adjusted_magnitude = 1000;
 
-#ifdef JOYSTICK_ACCEL_THRESHOLD
+#if JOYSTICK_ACCEL_THRESHOLD > 0
         if (adjusted_magnitude <= JOYSTICK_ACCEL_THRESHOLD) {
             // 直接ゾーン: 傾き量に比例した速度をそのまま使用（時間加速なし）
             int32_t target = (int32_t)adjusted_magnitude * JOYSTICK_DIRECT_SPEED / JOYSTICK_ACCEL_THRESHOLD;
@@ -398,6 +398,14 @@ void analog_stick_get_scroll_values(int16_t *out_x, int16_t *out_y) {
 
         *out_x = (int16_t)((int32_t)norm_x * scale / mag);
         *out_y = (int16_t)((int32_t)norm_y * scale / mag);
+
+        // スクロール方向の反転（向き補正の後に適用）
+#if JOYSTICK_SCROLL_INVERT_H
+        *out_x = -*out_x;
+#endif
+#if JOYSTICK_SCROLL_INVERT_V
+        *out_y = -*out_y;
+#endif
     }
 
     // カーソルモードに戻ったとき跳ばないよう加速状態をリセット

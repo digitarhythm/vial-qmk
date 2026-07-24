@@ -92,12 +92,15 @@ void keyboard_post_init_user(void) {
 #endif
 }
 
+// スクロール方向の反転は config.h の JOYSTICK_SCROLL_INVERT_V / _H で設定する
+// （ライブラリ側で反転済みの値が返る）
+
 // スクロール蓄積を8ms（125Hz）ごとに更新する
 // カーソル移動はこの制限を受けない
 #define SCROLL_INTERVAL_MS 8
 // 正規化傾き量（-1000〜+1000）をスクロール量に変換する除数
 // 大きくすると遅く、小さくすると速くなる
-#define SCROLL_SPEED_DIV 6000
+#define SCROLL_SPEED_DIV 4000
 // スクロール速度の上限（1〜1000）: 全倒しでもこの値以上の速度にならない
 // 小さくするほどスクロールの最高速が下がる
 #define SCROLL_MAX_SPEED 600
@@ -120,9 +123,8 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 
         if (timer_elapsed(scroll_timer) >= SCROLL_INTERVAL_MS) {
             scroll_timer = timer_read();
-            // 向き補正（JOYSTICK_ORIENTATION）適用後の値を反転してホイール方向を逆にする
-            scroll_accum_h -= stick_x;
-            scroll_accum_v -= stick_y;
+            scroll_accum_h += stick_x;
+            scroll_accum_v += stick_y;
         }
 
         mouse_report.x = 0;

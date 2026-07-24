@@ -19,6 +19,10 @@ enum {
   _WIN
 } os_layer_num;
 
+#ifdef OS_DETECTION_ENABLE
+  #include "os_detection.h"
+#endif
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT(
   //|---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------+---------------|
@@ -145,16 +149,17 @@ void keyboard_post_init_user(void) {
   wait_ms(400);
 
   switch (detected_host_os()) {
-    case OS_WINDOWS:
+    case OS_MACOS:
+    case OS_IOS:
+      layer_move(_MAC);
+      break;
+
     case OS_LINUX:
+    case OS_WINDOWS:
+    default:
       layer_move(_WIN);
       break;
 
-    case OS_MACOS:
-    case OS_IOS:
-    default:
-      layer_move(_MAC);
-      break;
   }
 }
 #endif

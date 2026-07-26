@@ -8,7 +8,6 @@
   #include "os_detection.h"
 #endif
 
-
 #define _BASE    0
 #define _BASE2   1
 #define _LOWER   2
@@ -75,10 +74,12 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 
 void keyboard_post_init_user(void) {
     analog_stick_init();
+}
 
 #ifdef OS_DETECTION_ENABLE
-    //wait_ms(100);
-    switch (detected_host_os()) {
+// OS判別が安定するたびに呼ばれる（PC起動時やスリープ復帰後の再判別にも追従する）
+bool process_detected_host_os_user(os_variant_t detected_os) {
+    switch (detected_os) {
         case OS_WINDOWS:
         case OS_LINUX:
             layer_move(_WIN);
@@ -89,8 +90,9 @@ void keyboard_post_init_user(void) {
             layer_move(_MAC);
             break;
     }
-#endif
+    return true;
 }
+#endif
 
 // スクロール方向の反転は config.h の JOYSTICK_SCROLL_INVERT_V / _H で設定する
 // （ライブラリ側で反転済みの値が返る）
@@ -103,7 +105,7 @@ void keyboard_post_init_user(void) {
 #define SCROLL_SPEED_DIV 4000
 // スクロール速度の上限（1〜1000）: 全倒しでもこの値以上の速度にならない
 // 小さくするほどスクロールの最高速が下がる
-#define SCROLL_MAX_SPEED 600
+#define SCROLL_MAX_SPEED 800
 
 static int32_t  scroll_accum_h = 0;
 static int32_t  scroll_accum_v = 0;

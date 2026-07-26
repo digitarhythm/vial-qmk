@@ -32,3 +32,5 @@
 // アナログスティックでの縦スクロール方向を上下反転
 //#define JOYSTICK_SCROLL_INVERT_V 1
 
+// ジョイスティックの最大速度
+#define JOYSTICK_MAX_SPEED 5000

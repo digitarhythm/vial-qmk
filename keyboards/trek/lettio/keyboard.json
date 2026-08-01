@@ -1,0 +1,628 @@
+{
+    "keyboard_name": "TReK Lettio",
+    "manufacturer": "digitarhythm",
+    "maintainer": "Hajime Oh-yake",
+    "usb": {
+        "vid": "0x1209",
+        "pid": "0xFF0A",
+        "device_version": "0.0.1"
+    },
+    "features": {
+        "bootmagic": true,
+        "encoder": true,
+        "mousekey": true,
+        "extrakey": true,
+        "command": true
+    },
+    "matrix_pins": {
+        "rows": [
+            "GP9",
+            "GP10",
+            "GP11",
+            "GP12"
+        ],
+        "cols": [
+            "GP0",
+            "GP1",
+            "GP2",
+            "GP3",
+            "GP4",
+            "GP5"
+        ]
+    },
+    "diode_direction": "COL2ROW",
+    "encoder": {
+        "rotary": [
+            {
+                "pin_a": "GP14",
+                "pin_b": "GP15",
+                "resolution": 2
+            },
+            {
+                "pin_a": "GP26",
+                "pin_b": "GP27",
+                "resolution": 2
+            },
+            {
+                "pin_a": "GP7",
+                "pin_b": "GP8",
+                "resolution": 2
+            }
+        ]
+    },
+    "rgb_matrix": {
+        "driver": "ws2812",
+        "led_count": 44,
+        "max_brightness": 128,
+        "sleep": true,
+        "timeout": 0,
+        "hue_steps": 4,
+        "sat_steps": 4,
+        "val_steps": 4,
+        "speed_steps": 4,
+        "animations": {
+            "solid_color": true,
+            "alphas_mods": true,
+            "gradient_up_down": true,
+            "gradient_left_right": true,
+            "breathing": true,
+            "band_sat": true,
+            "band_val": true,
+            "band_pinwheel_sat": true,
+            "band_pinwheel_val": true,
+            "band_spiral_sat": true,
+            "band_spiral_val": true,
+            "cycle_all": true,
+            "cycle_left_right": true,
+            "cycle_up_down": true,
+            "cycle_out_in": true,
+            "cycle_out_in_dual": true,
+            "rainbow_moving_chevron": true,
+            "cycle_pinwheel": true,
+            "cycle_spiral": true,
+            "dual_beacon": true,
+            "rainbow_beacon": true,
+            "rainbow_pinwheels": true,
+            "raindrops": true,
+            "jellybean_raindrops": true,
+            "hue_breathing": true,
+            "hue_pendulum": true,
+            "hue_wave": true,
+            "pixel_rain": true,
+            "pixel_flow": true,
+            "pixel_fractal": true,
+            "typing_heatmap": true,
+            "digital_rain": true,
+            "solid_reactive_simple": true,
+            "solid_reactive": true,
+            "solid_reactive_wide": true,
+            "solid_reactive_multiwide": true,
+            "solid_reactive_cross": true,
+            "solid_reactive_multicross": true,
+            "solid_reactive_nexus": true,
+            "solid_reactive_multinexus": true,
+            "splash": true,
+            "multisplash": true,
+            "solid_splash": true,
+            "solid_multisplash": true,
+            "starlight": true,
+            "starlight_dual_sat": true,
+            "starlight_dual_hue": true,
+            "riverflow": true
+        },
+        "default": {
+            "animation": "multisplash",
+            "hue": 128,
+            "sat": 0,
+            "val": 128,
+            "speed": 128
+        }
+    },
+    "ws2812": {
+        "driver": "vendor",
+        "pin": "GP6"
+    },
+    "processor": "RP2040",
+    "bootloader": "rp2040",
+    "layouts": {
+        "LAYOUT_lettio": {
+            "layout": [
+                {
+                    "matrix": [
+                        4,
+                        0
+                    ],
+                    "x": 8,
+                    "y": 1
+                },
+                {
+                    "matrix": [
+                        2,
+                        5
+                    ],
+                    "x": 7.5,
+                    "y": 2.34
+                },
+                {
+                    "matrix": [
+                        3,
+                        5
+                    ],
+                    "x": 8.5,
+                    "y": 2.34
+                },
+                {
+                    "matrix": [
+                        3,
+                        0
+                    ],
+                    "x": 1,
+                    "y": 4.25
+                },
+                {
+                    "matrix": [
+                        7,
+                        5
+                    ],
+                    "x": 8,
+                    "y": 4.25
+                },
+                {
+                    "matrix": [
+                        7,
+                        4
+                    ],
+                    "x": 15.25,
+                    "y": 4.25
+                },
+                {
+                    "matrix": [
+                        0,
+                        0
+                    ],
+                    "x": 1,
+                    "y": 1
+                },
+                {
+                    "matrix": [
+                        1,
+                        0
+                    ],
+                    "x": 1,
+                    "y": 2.04,
+                    "w": 1.25
+                },
+                {
+                    "matrix": [
+                        2,
+                        0
+                    ],
+                    "x": 1,
+                    "y": 3.1,
+                    "w": 1.75
+                },
+                {
+                    "matrix": [
+                        3,
+                        1
+                    ],
+                    "x": 3.5,
+                    "y": 4.28
+                },
+                {
+                    "matrix": [
+                        7,
+                        2
+                    ],
+                    "x": 12.5,
+                    "y": 4.28
+                },
+                {
+                    "matrix": [
+                        6,
+                        4
+                    ],
+                    "x": 14.5,
+                    "y": 3.1,
+                    "w": 1.75
+                },
+                {
+                    "matrix": [
+                        6,
+                        5
+                    ],
+                    "x": 14.75,
+                    "y": 2.04,
+                    "w": 1.5
+                },
+                {
+                    "matrix": [
+                        5,
+                        5
+                    ],
+                    "x": 15,
+                    "y": 1,
+                    "w": 1.25
+                },
+                {
+                    "matrix": [
+                        0,
+                        1
+                    ],
+                    "x": 2,
+                    "y": 1.02,
+                    "r": 2,
+                    "rx": 2.5,
+                    "ry": 1.52
+                },
+                {
+                    "matrix": [
+                        1,
+                        1
+                    ],
+                    "x": 2.25,
+                    "y": 2.06,
+                    "r": 2,
+                    "rx": 2.75,
+                    "ry": 2.56
+                },
+                {
+                    "matrix": [
+                        2,
+                        1
+                    ],
+                    "x": 2.75,
+                    "y": 3.12,
+                    "r": 2,
+                    "rx": 3.25,
+                    "ry": 3.62
+                },
+                {
+                    "matrix": [
+                        0,
+                        5
+                    ],
+                    "x": 6,
+                    "y": 1.26,
+                    "r": 2,
+                    "rx": 6.5,
+                    "ry": 1.76
+                },
+                {
+                    "matrix": [
+                        1,
+                        5
+                    ],
+                    "x": 6.25,
+                    "y": 2.34,
+                    "r": 2,
+                    "rx": 6.75,
+                    "ry": 2.84
+                },
+                {
+                    "matrix": [
+                        3,
+                        4
+                    ],
+                    "x": 6.75,
+                    "y": 3.4,
+                    "r": 2,
+                    "rx": 7.25,
+                    "ry": 3.9
+                },
+                {
+                    "matrix": [
+                        0,
+                        2
+                    ],
+                    "x": 3,
+                    "y": 1.06,
+                    "r": 4,
+                    "rx": 3.5,
+                    "ry": 1.56
+                },
+                {
+                    "matrix": [
+                        1,
+                        2
+                    ],
+                    "x": 3.25,
+                    "y": 2.12,
+                    "r": 4,
+                    "rx": 3.75,
+                    "ry": 2.62
+                },
+                {
+                    "matrix": [
+                        2,
+                        2
+                    ],
+                    "x": 3.75,
+                    "y": 3.18,
+                    "r": 4,
+                    "rx": 4.25,
+                    "ry": 3.68
+                },
+                {
+                    "matrix": [
+                        3,
+                        2
+                    ],
+                    "x": 4.5,
+                    "y": 4.34,
+                    "w": 1.25,
+                    "r": 4,
+                    "rx": 5.125,
+                    "ry": 4.84
+                },
+                {
+                    "matrix": [
+                        0,
+                        4
+                    ],
+                    "x": 5,
+                    "y": 1.22,
+                    "r": 4,
+                    "rx": 5.5,
+                    "ry": 1.72
+                },
+                {
+                    "matrix": [
+                        1,
+                        4
+                    ],
+                    "x": 5.25,
+                    "y": 2.3,
+                    "r": 4,
+                    "rx": 5.75,
+                    "ry": 2.8
+                },
+                {
+                    "matrix": [
+                        2,
+                        4
+                    ],
+                    "x": 5.75,
+                    "y": 3.36,
+                    "r": 4,
+                    "rx": 6.25,
+                    "ry": 3.86
+                },
+                {
+                    "matrix": [
+                        0,
+                        3
+                    ],
+                    "x": 4,
+                    "y": 1.14,
+                    "r": 6,
+                    "rx": 4.5,
+                    "ry": 1.64
+                },
+                {
+                    "matrix": [
+                        1,
+                        3
+                    ],
+                    "x": 4.25,
+                    "y": 2.2,
+                    "r": 6,
+                    "rx": 4.75,
+                    "ry": 2.7
+                },
+                {
+                    "matrix": [
+                        2,
+                        3
+                    ],
+                    "x": 4.75,
+                    "y": 3.28,
+                    "r": 6,
+                    "rx": 5.25,
+                    "ry": 3.78
+                },
+                {
+                    "matrix": [
+                        3,
+                        3
+                    ],
+                    "x": 5.78,
+                    "y": 4.46,
+                    "w": 1.5,
+                    "r": 6,
+                    "rx": 6.53,
+                    "ry": 4.96
+                },
+                {
+                    "matrix": [
+                        7,
+                        0
+                    ],
+                    "x": 9.75,
+                    "y": 4.46,
+                    "w": 1.5,
+                    "r": -6,
+                    "rx": 10.5,
+                    "ry": 4.96
+                },
+                {
+                    "matrix": [
+                        6,
+                        2
+                    ],
+                    "x": 11.25,
+                    "y": 3.28,
+                    "r": -6,
+                    "rx": 11.75,
+                    "ry": 3.78
+                },
+                {
+                    "matrix": [
+                        5,
+                        2
+                    ],
+                    "x": 11.75,
+                    "y": 2.2,
+                    "r": -6,
+                    "rx": 12.25,
+                    "ry": 2.7
+                },
+                {
+                    "matrix": [
+                        4,
+                        3
+                    ],
+                    "x": 12,
+                    "y": 1.14,
+                    "r": -6,
+                    "rx": 12.5,
+                    "ry": 1.64
+                },
+                {
+                    "matrix": [
+                        6,
+                        1
+                    ],
+                    "x": 10.25,
+                    "y": 3.36,
+                    "r": -4,
+                    "rx": 10.75,
+                    "ry": 3.86
+                },
+                {
+                    "matrix": [
+                        5,
+                        1
+                    ],
+                    "x": 10.75,
+                    "y": 2.3,
+                    "r": -4,
+                    "rx": 11.25,
+                    "ry": 2.8
+                },
+                {
+                    "matrix": [
+                        4,
+                        2
+                    ],
+                    "x": 11,
+                    "y": 1.22,
+                    "r": -4,
+                    "rx": 11.5,
+                    "ry": 1.72
+                },
+                {
+                    "matrix": [
+                        7,
+                        1
+                    ],
+                    "x": 11.25,
+                    "y": 4.34,
+                    "w": 1.25,
+                    "r": -4,
+                    "rx": 11.875,
+                    "ry": 4.84
+                },
+                {
+                    "matrix": [
+                        6,
+                        3
+                    ],
+                    "x": 12.25,
+                    "y": 3.18,
+                    "r": -4,
+                    "rx": 12.75,
+                    "ry": 3.68
+                },
+                {
+                    "matrix": [
+                        5,
+                        3
+                    ],
+                    "x": 12.75,
+                    "y": 2.12,
+                    "r": -4,
+                    "rx": 13.25,
+                    "ry": 2.62
+                },
+                {
+                    "matrix": [
+                        4,
+                        4
+                    ],
+                    "x": 13,
+                    "y": 1.06,
+                    "r": -4,
+                    "rx": 13.5,
+                    "ry": 1.56
+                },
+                {
+                    "matrix": [
+                        6,
+                        0
+                    ],
+                    "x": 9.25,
+                    "y": 3.4,
+                    "r": -2,
+                    "rx": 9.75,
+                    "ry": 3.9
+                },
+                {
+                    "matrix": [
+                        5,
+                        0
+                    ],
+                    "x": 9.75,
+                    "y": 2.34,
+                    "r": -2,
+                    "rx": 10.25,
+                    "ry": 2.84
+                },
+                {
+                    "matrix": [
+                        4,
+                        1
+                    ],
+                    "x": 10,
+                    "y": 1.26,
+                    "r": -2,
+                    "rx": 10.5,
+                    "ry": 1.76
+                },
+                {
+                    "matrix": [
+                        7,
+                        3
+                    ],
+                    "x": 13.25,
+                    "y": 3.12,
+                    "r": -2,
+                    "rx": 13.75,
+                    "ry": 3.62
+                },
+                {
+                    "matrix": [
+                        5,
+                        4
+                    ],
+                    "x": 13.75,
+                    "y": 2.06,
+                    "r": -2,
+                    "rx": 14.25,
+                    "ry": 2.56
+                },
+                {
+                    "matrix": [
+                        4,
+                        5
+                    ],
+                    "x": 14,
+                    "y": 1.02,
+                    "r": -2,
+                    "rx": 14.5,
+                    "ry": 1.52
+                }
+            ]
+        }
+    }
+}

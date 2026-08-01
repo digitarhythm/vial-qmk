@@ -1,0 +1,10 @@
+OS_DETECTION_ENABLE = yes
+KEY_OVERRIDE_ENABLE = yes
+ENCODER_MAP_ENABLE = yes
+
+AUDIO_ENABLE = no
+
+CUSTOM_MATRIX = lite
+DEBOUNCE_TYPE = sym_eager_pk
+
+SRC += matrix.c

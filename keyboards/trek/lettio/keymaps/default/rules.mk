@@ -1,0 +1,11 @@
+VIA_ENABLE = yes
+VIAL_ENABLE = yes
+RGBLIGHT_ENABLE = no
+RGB_MATRIX_ENABLE = yes
+GRAVE_ESC_ENABLE = yes
+SPACE_CADET_ENABLE = no
+
+POINTING_DEVICE_ENABLE = yes
+POINTING_DEVICE_DRIVER = custom
+
+SRC += analog.c qmk_analog_stick.c

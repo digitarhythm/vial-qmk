@@ -15,10 +15,8 @@
 #define _ADJUST  4
 #define _ADJUST2 5
 
-enum {
-  _MAC,
-  _WIN
-} os_layer_num;
+// OS ごとのキーの差し替えは HostOS（HOS(n) = タップダンス末尾枠の転用）で行う（quantum/host_os）。
+// レイヤーを OS ごとに複製する必要はないため、_MAC / _WIN レイヤーは廃止した。
 
 /*
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -187,22 +185,21 @@ void keyboard_post_init_user(void) {
   analog_stick_init();
 }
 
-#ifdef OS_DETECTION_ENABLE
-// OS判別が安定するたびに呼ばれる（PC起動時やスリープ復帰後の再判別にも追従する）
-bool process_detected_host_os_user(os_variant_t detected_os) {
-  switch (detected_os) {
-    case OS_WINDOWS:
-    case OS_LINUX:
-      layer_move(_WIN);
-      break;
-    case OS_MACOS:
-    case OS_IOS:
-    default:
-      layer_move(_MAC);
-      break;
-  }
-  return true;
-}
+// HostOS は quantum/host_os/host_os.c が keymap_key_to_keycode() を
+// オーバーライドして実現している。タップダンスの末尾 16 枠を HOS(0)〜HOS(15) として使う。
+// 既定値は下記 host_os_actions[] で、Vial の HostOS タブからも変更できる。
+
+// OS 判別によるレイヤー切り替え（layer_move）は廃止した。
+// 判別結果は HostOS のキー（HOS(n)）が押下時に detected_host_os() で直接参照する。
+// これにより base レイヤーを OS ごとに複製する必要がなくなり、レイヤー 1 が空く。
+
+#ifdef VIAL_HOST_OS_ENABLE
+#include "host_os.h"
+// HostOS の既定値（EEPROM リセット後、空の枠にだけ書き込まれる。Vial の HostOS タブから変更可能）。
+// 0番: 左手親指の Cmd/Ctrl 相当キー用（macOS=GUI, Windows=Ctrl）
+const host_os_entry_t host_os_actions[HOST_OS_COUNT] = {
+    [0] = HOST_OS(.kc_macos = KC_LGUI, .kc_windows = KC_LCTL),
+};
 #endif
 
 // スクロール方向の反転は config.h の JOYSTICK_SCROLL_INVERT_V / _H で設定する

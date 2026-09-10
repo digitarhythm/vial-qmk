@@ -1,4 +1,5 @@
 {
+  "hostOS": {"count": 16},
   "lighting": "none",
   "matrix": {
     "rows": 8,

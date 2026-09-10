@@ -1,4 +1,3 @@
-OS_DETECTION_ENABLE = yes
 KEY_OVERRIDE_ENABLE = yes
 ENCODER_MAP_ENABLE = yes
 
@@ -8,3 +7,5 @@ CUSTOM_MATRIX = lite
 DEBOUNCE_TYPE = sym_eager_pk
 
 SRC += matrix.c
+
+SRC += tapping.c

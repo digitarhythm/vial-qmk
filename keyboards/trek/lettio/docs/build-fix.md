@@ -727,7 +727,442 @@ Vial の RGB 制御 UI（VIALRGB）は姉妹機も含めて未使用のため、
 輝度やアニメーションの変更は VIA 側の RGB Matrix コントロール、
 またはキーマップに `RGB_*` キーコードを割り当てて行う。
 
-## 11. 残課題
+## 11. OS 判別キー（TapDance 転用）の実装（2026-09-01）
+
+> **廃止（2026-09-04）**: 本節〜§13 のタップダンス相乗り方式は、専用 EEPROM 領域を使う
+> 「OS Dance」（`quantum/os_dance/`）に置き換えた。ここで参照している
+> `os_tapdance*.c/h`・`tests/`・`docs/os-tapdance-spec.md`・`keyboards/trek/common/os_dance/` は
+> **すべて削除済み**。経緯の記録として残す。現行の仕様は §15 を参照。
+
+### 11.1 背景
+
+OS 自動判別を `layer_move()` によるレイヤー切り替えで実現していたため、
+6 レイヤー中 2 枚（`_MAC` = 0 / `_WIN` = 1）を base レイヤーの複製に費やしていた。
+
+Vial のタップダンス枠の末尾 4 つを転用し、1 キー単位で OS ごとのキーコードを
+送信できるようにした。詳細仕様は `docs/os-tapdance-spec.md` を参照。
+
+### 11.2 仕組み
+
+`quantum/keymap_common.c:204` の `keymap_key_to_keycode()` が `__attribute__((weak))` である。
+これをオーバーライドし、キーマップから読み出したキーコードが `TD(24)`〜`TD(31)` だったら
+OS 対応キーコードに差し替えて返す。
+
+キーコードの解決経路は 2 本あり、その**両方**がこの関数を通る。
+
+| 経路 | 呼び出し元 | 用途 |
+|---|---|---|
+| `action_for_key()` | `quantum/keymap_common.c:55` | タッピング機構（モッドタップ／レイヤータップ判定） |
+| `get_record_keycode()` | `quantum/quantum.c:278, 281` | `process_record_quantum` に渡すキーコード |
+
+両方が差し替え後のキーコードを見るため、モッドタップやレイヤータップを
+**キーマップに直接書いたのと同じ経路・同じ応答速度**で処理される。
+
+| Vial GUI の欄 | 構造体フィールド | 意味 |
+|---|---|---|
+| Tap | `on_tap` | macOS / iOS |
+| Hold | `on_hold` | Windows |
+| Double Tap | `on_double_tap` | Linux |
+| Tap + Hold | `on_tap_hold` | Default（判別不能時・各欄が空のときのフォールバック） |
+
+設定値は EEPROM の既存タップダンス領域（739〜1058）から毎回読み出すため、
+**EEPROM のレイアウト変更は不要**で、Vial の TapDance 設定画面から変更できる。
+
+### 11.3 追加・変更したファイル
+
+| ファイル | 内容 |
+|---|---|
+| `os_tapdance_select.h` / `os_tapdance_select.c` | 純粋ロジック（QMK 非依存・ホストテスト可能） |
+| `os_tapdance.h` / `os_tapdance.c` | QMK 連携（TD 番号判定・EEPROM 読み出し・キー送信） |
+| `rules.mk` | `SRC += os_tapdance.c os_tapdance_select.c` |
+| `keymaps/default/keymap.c` | `process_record_user()` を追加 |
+| `tests/os_tapdance_test.c` / `tests/run_tests.sh` | ホスト側ユニットテスト |
+
+### 11.4 検証結果
+
+ホスト側ユニットテスト（`./tests/run_tests.sh`）: **50 / 50 passed**
+
+ELF の逆アセンブルで、ソースどおりの機械語が生成されていることを確認した。
+
+`keymap_key_to_keycode`（`0x10002db0`）:
+
+| 確認項目 | 機械語上の根拠 |
+|---|---|
+| 本実装が weak 定義に優先している | `os_tapdance.o` で `T`、`keymap_common.o` で `W` |
+| `VIAL_MATRIX_MAGIC` の分岐 | `cmp r4, #240` / `cmp r1, #240` |
+| マトリクス範囲 | `cmp r4, #7`（`MATRIX_ROWS`=8）/ `cmp r1, #5`（`MATRIX_COLS`=6） |
+| エンコーダ | `cmp r4, #253` / `#252`、`cmp r1, #2`（`NUM_ENCODERS`=3） |
+| **全経路が変換を通る** | すべての分岐が `bl os_td_translate_keycode` に合流 |
+
+`os_td_translate_keycode`（`0x10002d64`）:
+
+| 確認項目 | 機械語上の根拠 |
+|---|---|
+| タップダンスキーコードの判定 | `.word 0xffffa900`（= `-QK_TAP_DANCE`） |
+| `VIAL_TAP_DANCE_ENTRIES` = 32 | `movs r1, #32` → `bl os_td_is_target_index` |
+| 4 欄の読み出し順 | `ldrh [r5,#0]` / `[r5,#2]` / `[r5,#4]` / `[r5,#6]` = tap / hold / double_tap / tap_hold |
+| OS 判別の呼び出し | `bl detected_host_os` → `bl os_td_select_keycode` |
+| **注入経路が残っていない** | `os_tapdance.o` に `vial_keycode_down` / `vial_keycode_up` / `action_exec` の呼び出しが 0 件 |
+
+ビルド成果物:
+
+| 項目 | 値 |
+|---|---|
+| ファイル | `keyboards/trek/lettio/trek_lettio_default.uf2` |
+| サイズ | 156,672 バイト |
+| sha256 | `2e4fe1a2404214c5cb0c01b6076119f414d29de2e14b620a9803b5933415dff0` |
+| text | 78,300 バイト |
+
+### 11.5 ビルド時に発生した問題
+
+`_Static_assert` で `os_variant_t` と自前の OS 定数を比較したところ、
+別の enum 同士の比較となり `-Werror=enum-compare` でエラーになった。
+両辺を `(int)` にキャストして解決した。
+
+### 11.6 OS 判別によるレイヤー切り替えの廃止
+
+本機能で代替できるため、`keymaps/default/keymap.c` から次を削除した。
+
+- `process_detected_host_os_user()` のオーバーライド（`layer_move(_MAC)` / `layer_move(_WIN)`）
+- `_MAC` / `_WIN` の列挙
+
+削除後、ELF 内の `process_detected_host_os_user` は QMK の weak 定義（4 バイト、`return true` のみ）
+に戻っていることを確認した。
+
+```
+1000ca8c 00000004 W process_detected_host_os_user
+```
+
+これによりレイヤー 1（`_BASE2`）が OS 複製用途から解放された。
+`keymaps` 配列のレイヤー内容そのものは変更していない（実際に使われるキーマップは
+EEPROM 側であり、Vial から編集するため）。
+
+| | 変更前 | 変更後 |
+|---|---|---|
+| レイヤー 0 | `_MAC`（base の Mac 版） | `_BASE`（OS 共通） |
+| レイヤー 1 | `_WIN`（base の Win 版） | 空き |
+| OS 依存キー | レイヤーごとに個別定義 | `TD(24)`〜`TD(31)` を配置 |
+
+### 11.7 モッドタップの遅延と実装方式の変更（2026-09-01）
+
+初版は `process_record_user()` で `TD(24)`〜`TD(31)` を横取りし、
+`vial_keycode_down()` / `vial_keycode_up()` でキーコードを送信していた。
+実機で試したところ**モッドタップを設定したときに体感できる遅延**が発生した。
+
+原因は `vial_keycode_down()` の分岐（`quantum/vial.c:332-343`）。
+
+```c
+if (keycode <= QK_MODS_MAX) {   // 0x1FFF 以下
+    register_code16(keycode);    // 即座にレポート送信
+} else {
+    action_exec(...);            // 偽キーイベントを注入
+}
+```
+
+| 設定したキーコード | 経路 | 遅延 |
+|---|---|---|
+| `KC_LGUI` などの素の修飾キー | `register_code16()` | なし |
+| `LGUI_T(KC_TAB)` などのモッドタップ（0x2000〜） | `action_exec()` による注入 | あり |
+
+偽イベントの注入は `process_record_user()` の内側から行われるが、その
+`process_record_user()` 自身が `action_tapping_process()` の内側から呼ばれている
+（`quantum/action.c:135` → … → `process_record_quantum`）。
+つまりタッピング状態機械への**再入**となり、注入されたモッドタップは
+`waiting_buffer` 経由で遅れて処理される。
+
+Lettio で OS ごとに差し替えたいキーは `LGUI_T(KC_TAB)` / `LGUI_T(KC_LNG2)` /
+`RGUI_T(KC_LNG1)` といったモッドタップそのものであるため、この経路に直撃していた。
+
+そこで 11.2 の方式（`keymap_key_to_keycode()` のオーバーライド）に変更し、
+注入を一切行わないようにした。差し替え後は QMK から見て普通のキーコードなので、
+キーマップに直接書いた場合と応答速度が同一になる。
+
+なお本方式は `keymap_key_to_keycode()` の本体を複製しているため、
+vial-qmk を更新した際は `quantum/keymap_common.c` の同関数に変更が無いか確認すること。
+
+### 11.8 通常のタップダンスから OS 判別キーを呼べなかった問題（2026-09-01）
+
+通常のタップダンスの Tap 欄などに `TD(28)` を入れても反映されない不具合があった。
+
+原因は `keymap_key_to_keycode()` のオーバーライドで、`VIAL_MATRIX_MAGIC` の分岐が
+変換を通さず即 `return` していたこと。
+
+```c
+if (key.row == VIAL_MATRIX_MAGIC && key.col == VIAL_MATRIX_MAGIC) {
+    return g_vial_magic_keycode_override;   /* ← 変換されないまま返っていた */
+}
+```
+
+通常のタップダンスの各欄は `vial_keycode_down()` で送信される。
+`TD(28)` = `0x571C` は `QK_MODS_MAX`（`0x1FFF`）より大きいため `action_exec()` による
+注入経路に入り、この分岐を通る。ここで変換されないため `TD(28)` のまま返っていた。
+
+修正内容:
+
+1. `VIAL_MATRIX_MAGIC` の分岐でも `os_td_translate_keycode()` を通すようにした
+   （全経路が変換に合流する構造に変更）
+2. 入れ子（OS 判別キーの欄に別の OS 判別キー）を解決できるよう、変換を繰り返すようにした
+3. 循環参照でも停止するよう、深さを `OS_TD_COUNT`（4）回までに制限し、
+   解決しきれない場合は `KC_NO` を返すようにした
+
+検証（`0x10002db0` / `0x10002d64` の逆アセンブル）:
+
+| 確認項目 | 機械語上の根拠 |
+|---|---|
+| 注入経路も変換を通る | `cmp r4,#240` → `ldrh r2,[r3]`（override 読み出し）→ `bl os_td_translate_keycode` に合流 |
+| ロック中は KC_NO | `cmp r3,r2` → `bne` で `r2`=0 のまま復帰（変換は通らない） |
+| 繰り返し回数の上限 | `movs r5, #4`（= `OS_TD_COUNT`） |
+| 枠数の判定 | `movs r1, #32` → `bl os_td_index_of_keycode` |
+
+## 12. モッドタップの Hold が効かなかった問題（CHORDAL_HOLD）（2026-09-02）
+
+### 12.1 症状
+
+`LGUI_T(...)` などのモッドタップで Cmd+Tab を押しても、Cmd を押してから
+Tapping Term ぶん待たないと Tab が効かない。
+Vial の QMK Settings で「Hold on other key press」を ON にしても改善しない。
+
+### 12.2 原因
+
+`builddefs/build_vial.mk:29` が QMK Settings 有効時に `-DCHORDAL_HOLD` を**無条件で**定義する。
+
+コーダルホールドは「同じ手のキー同士の同時押しは Hold にしない」という規則で、
+手の割り当ては `keyboard.json` のキー座標から自動生成される。
+Lettio では生成結果が次のようになっていた（`.build/obj_trek_lettio_default/src/default_keyboard.c:42`）。
+
+```c
+const char chordal_hold_layout[MATRIX_ROWS][MATRIX_COLS] PROGMEM = LAYOUT_lettio(
+  'L',  'L','L',  'L','L','R',  'L','L','L','L','L','L','L','R',
+  'L','L','L','L','L','L',  'L','L','L','L','L','L','L',
+  'L','L','L','L','L','L','L','L',  'L','L','L','L','L','L','L',
+  'L','L','L','L','L','L'
+);
+```
+
+**48 キー中 46 キーが `'L'`（左手）**と判定されている。
+そのため `get_chordal_hold_default()`（`quantum/action_tapping.c:756`）は
+ほぼすべての組み合わせで「同じ手」と判断して `false` を返す。
+
+```c
+char tap_hold_hand = chordal_hold_handedness(tap_hold_record->event.key);  // 'L'
+if (tap_hold_hand == '*') return true;
+char other_hand = chordal_hold_handedness(other_record->event.key);        // 'L'
+return other_hand == '*' || tap_hold_hand != other_hand;                   // 'L' != 'L' → false
+```
+
+その結果 `quantum/action_tapping.c:424` で Hold が却下される。
+
+```c
+if (is_mt_or_lt(tapping_keycode) && !get_chordal_hold(...)) {
+    // → Hold ではなく Tap として確定
+}
+```
+
+**この判定は `HOLD_ON_OTHER_KEY_PRESS` より先に効く**ため、
+Vial の設定を ON にしても効果が無かった。
+
+### 12.3 修正
+
+`chordal_hold_handedness()`（weak）をオーバーライドし、常に `'*'`（手が不明）を返すようにした。
+`get_chordal_hold_default()` は `'*'` を受け取ると即 `true` を返すため、
+コーダルホールドによる却下が無くなり `HOLD_ON_OTHER_KEY_PRESS` が本来どおり働く。
+
+追加ファイル: `keyboards/trek/lettio/tapping.c`（`rules.mk` に `SRC += tapping.c`）
+
+```c
+char chordal_hold_handedness(keypos_t key) {
+    (void)key;
+    return '*';
+}
+```
+
+### 12.4 検証
+
+| 確認項目 | 機械語上の根拠 |
+|---|---|
+| 本実装が weak 定義に優先 | `tapping.o` で `T`、`action_tapping.o` で `W` |
+| 常に `'*'` を返す | `movs r0, #42`（= `0x2A` = `'*'`）→ `bx lr` |
+
+ビルド成果物:
+
+| 項目 | 値 |
+|---|---|
+| ファイル | `keyboards/trek/lettio/trek_lettio_default.uf2` |
+| サイズ | 156,672 バイト |
+| sha256 | `2b9da934d0b61d75231d2643fffa3dfce4d70ac61c720481db4a7524b4f5b62a` |
+| text | 78,236 バイト |
+
+### 12.5 併せて判明したこと
+
+QMK Settings（`QMK_SETTINGS = yes`、Vial では既定で有効）が入ると、
+`build_vial.mk:29` が `-DPERMISSIVE_HOLD_PER_KEY -DHOLD_ON_OTHER_KEY_PRESS_PER_KEY
+-DQUICK_TAP_TERM_PER_KEY -DRETRO_TAPPING_PER_KEY` を定義する。
+そのため以下の `config.h` の定義は**無効**になり、Vial の QMK Settings タブの値が使われる。
+
+| `config.h` の定義 | 実際に使われる値 |
+|---|---|
+| `#define HOLD_ON_OTHER_KEY_PRESS` | QMK Settings の値（既定 OFF。`QS.tapping_v2 = 0`） |
+| `#define QUICK_TAP_TERM 100` | QMK Settings の値（既定 `TAPPING_TERM` = 200） |
+| `#define PERMISSIVE_HOLD`（コメントアウト中） | QMK Settings の値（既定 OFF） |
+
+`TAPPING_TERM` は `QS.tapping_term = TAPPING_TERM` で初期化されるため、
+`config.h` の 200 がそのまま既定値になる。
+
+### 12.6 タップダンスの Hold は待ち時間を短縮できない
+
+`quantum/vial.c` の `dance_step()` は次のとおり。
+
+```c
+if (state->count == 1) {
+    if (state->interrupted || !state->pressed) return SINGLE_TAP;
+    else return SINGLE_HOLD;
+}
+```
+
+**他のキーを押すと `interrupted` になり、Hold ではなく Tap になる。**
+タップダンスキーコードのアクションは `ACTION_NO`（`quantum/keymap_common.c:196`）であり、
+`action_tapping` の「タッピングキー」にはならないため、
+`HOLD_ON_OTHER_KEY_PRESS` は原理的に適用されない。
+
+したがって修飾キーはタップダンスではなく**モッドタップ**（`LGUI_T(...)`）を使うこと。
+OS 判別キー `TD(24)`〜`TD(31)` の各欄にモッドタップキーコードを入れれば、
+キーマップに直接書いたのと同じ扱いになる（11.2 のキーコード置き換えによる）。
+
+### 12.7 OS 判別キーの枠を 8 つに拡張（2026-09-02）
+
+`OS_TD_COUNT` を 4 → **8** に変更した。対象は `TD(24)`〜`TD(31)` の8枠になり、
+通常のタップダンスとして残るのは `TD(0)`〜`TD(23)` の24枠。
+
+変更は `os_tapdance_select.h` の定数1つのみ。判定（`os_td_is_target_index()`）も
+入れ子解決のループ上限も、この定数から算出される。
+
+| 確認項目 | 機械語上の根拠 |
+|---|---|
+| 対象範囲の起点 | `os_td_is_target_index` 内の `subs r1, #8`（= `entries - OS_TD_COUNT`）→ 32-8=24 |
+| 入れ子解決の上限 | `os_td_translate_keycode` 冒頭の `movs r5, #8` |
+| 枠数 | `movs r1, #32`（`VIAL_TAP_DANCE_ENTRIES`） |
+
+ホスト側ユニットテスト: **50 / 50 passed**（TDD どおり、テストを先に更新して7件が赤になることを確認してから定数を変更した）
+
+ビルド成果物:
+
+| 項目 | 値 |
+|---|---|
+| ファイル | `keyboards/trek/lettio/trek_lettio_default.uf2` |
+| サイズ | 156,672 バイト |
+| sha256 | `b4e78eebc47739deef25ef91b632c450227ced982f7a4d3d92ef7bfe933ac2ad` |
+| text | 78,236 バイト |
+
+EEPROM のレイアウトは変わらない（既存のタップダンス領域をそのまま使う）。
+
+## 13. OS Dance の共通化と枠の独立化（2026-09-03）
+
+### 13.1 やったこと
+
+OS 判別キーを **「OS Dance」** という名前の共通コンポーネントに切り出し、
+`keyboards/trek/common/os_dance/` へ移した。他のファームウェアからは
+`rules.mk` に 1 行 `include` するだけで使える。
+
+```make
+TAP_DANCE_COUNT = 32   # 省略可（既定 32）
+OS_DANCE_COUNT  = 10   # 省略可（既定 10）
+include keyboards/trek/common/os_dance/os_dance.mk
+```
+
+`SRC +=` だけでは足りない。共通ディレクトリのファイルを make が探すための
+`VPATH +=`（ヘッダの `-I` もここから生成される。`builddefs/build_keyboard.mk:586`）と、
+`-DOS_DETECTION_ENABLE` を立てるための `OS_DETECTION_ENABLE = yes`
+（`builddefs/generic_features.mk:46`）が要るため、`.mk` にまとめて `include` させる。
+
+### 13.2 タップダンス枠を食わないようにした
+
+従来は既存の 32 枠のうち末尾を転用していたため、通常のタップダンスが減っていた。
+`VIAL_TAP_DANCE_ENTRIES` は `quantum/vial.h:81` が `#ifndef` ガード付きなので、
+`-D` で「通常枠 + OS Dance 枠」に拡張できる。
+
+```make
+OS_DANCE_TOTAL_ENTRIES := $(shell expr $(TAP_DANCE_COUNT) + $(OS_DANCE_COUNT))
+OPT_DEFS += -DOS_TD_COUNT=$(OS_DANCE_COUNT)
+OPT_DEFS += -DVIAL_TAP_DANCE_ENTRIES=$(OS_DANCE_TOTAL_ENTRIES)
+```
+
+足し算を make にやらせているので、2 つの定数がずれることは構造的に起きない。
+
+| | 変更前 | 変更後 |
+|---|---|---|
+| タップダンス総枠数 | 32 | **42** |
+| 通常のタップダンス | `TD(0)`〜`TD(23)`（24枠） | **`TD(0)`〜`TD(31)`（32枠）** |
+| OS Dance | `TD(24)`〜`TD(31)`（8枠） | **`TD(32)`〜`TD(41)`（10枠）** |
+
+判定ロジック（`os_td_is_target_index()`）は元から末尾からの相対計算なので変更不要だった。
+必要だったのは `OS_TD_COUNT` に `#ifndef` ガードを付けることだけ。
+
+### 13.3 EEPROM の実測（コンパイル時プローブ）
+
+`char probe[EXPR + 1];` を定義して `arm-none-eabi-nm --print-size` でシンボルサイズを
+読み出す方法で、マクロの展開結果を実測した。
+
+| 領域 | 先頭 | 32枠時 | 42枠時 |
+|---|---:|---:|---:|
+| VIA config | 0 | 51 | 51 |
+| キーマップ | 51 | 576 | 576 |
+| エンコーダ | 627 | 72 | 72 |
+| QMK Settings | 699 | 40 | 40 |
+| **タップダンス** | 739 | 320 | **420** |
+| コンボ 32 | — | 320 | 320 |
+| キーオーバーライド 32 | — | 320 | 320 |
+| Alt Repeat 32 | — | 64 | 64 |
+| **マクロ（残り全部）** | — | 2333 | **2233** |
+| 合計 | | 4096 | 4096 |
+
+RAM は 1 枠 29 バイト（`tap_dance_actions` 28 + `dance_state` 1）で +290 バイト。
+
+### 13.4 専用 EEPROM 領域にしなかった理由
+
+OS Dance 専用の EEPROM 領域を新設する案を検討したが、採らなかった。
+
+Vial の設定 GUI は firmware とは別アプリで、`vial_dynamic_entry_op`
+（`quantum/vial.h:50`）のサブコマンド番号が双方にハードコードされている。
+専用領域を作ると `quantum/` 配下の上流ファイル 4〜5 個の改変に加えて
+**Vial アプリ本体を fork して配布する必要**が出る。
+タップダンスに相乗りしている限り、標準の Vial がそのまま設定 UI として使える。
+
+### 13.5 検証
+
+ホストテストは `OS_TD_COUNT` を **既定(10) / 4 / 1 / 0 の 4 通り**でビルドして実行する。
+
+```
+OS_TD_COUNT = 10 / VIAL_TAP_DANCE_ENTRIES = 42   46 / 46 passed
+OS_TD_COUNT =  4 / VIAL_TAP_DANCE_ENTRIES = 36   46 / 46 passed
+OS_TD_COUNT =  1 / VIAL_TAP_DANCE_ENTRIES = 33   46 / 46 passed
+OS_TD_COUNT =  0 / VIAL_TAP_DANCE_ENTRIES = 32   31 / 31 passed
+```
+
+`OS_TD_COUNT = 0` では `uint8_t < 0` が常時偽になり `-Werror=type-limits` で
+落ちたため、比較そのものをプリプロセッサで消した。あわせて
+`os_td_translate_keycode()` のループ上限を `OS_TD_MAX_CHAIN`
+（0 のときも 1 周する）に変えた。0 枠だと 1 周も回らず `KC_NO` を返す不具合があった。
+
+機械語での確認。
+
+| 確認項目 | 根拠 |
+|---|---|
+| ビルドに使われたのは共通版 | `.d` が `keyboards/trek/common/os_dance/os_tapdance{,_select}.h` を指す |
+| 対象範囲の起点 | `os_td_is_target_index` の `subs r1, #10`（42−10 = 32） |
+| 枠不足ガード | 同 `cmp r1, #9` |
+| 入れ子解決の上限 | `os_td_translate_keycode` の `movs r5, #10` |
+| 枠数 | 同 `movs r1, #42` |
+
+### 13.6 注意点
+
+**保存済みの `.vil` は作り直しが必要。** OS Dance が `TD(24)`〜`TD(31)` から
+`TD(32)`〜`TD(41)` へ移動するため、旧 `.vil` を読み込むと OS 別設定が
+通常のタップダンス枠に入ってしまう。
+
+Vial GUI が 42 枠を正しく扱えるかは**実機未検証**。プロトコル上は
+`quantum/vial.c:231` が枠数を 1 バイトで返すだけなので問題ないはず。
+
+## 14. 残課題
 
 ### 6.1 スティック押し込みのデフォルトキーコード
 
@@ -758,3 +1193,102 @@ Vial から変更可能なので、実機で使いながら決めてよい。
 - スティック押し込み `[7,5]` の反応
 - スティック押し込みながらの USB 接続でブートローダーに入るか
 - 3基のロータリーエンコーダの動作
+
+## 15. OS Dance を専用 EEPROM 領域方式へ移行（2026-09-04）
+
+### 15.1 なぜ移行したか
+
+タップダンス相乗り方式（§11〜§13）は「標準の Vial GUI で設定できる」ことを最優先にした
+設計だった。Vial-GUI 側を改修する方針が決まったため、その制約が外れ、次の利点を取った。
+
+| | 相乗り方式 | 専用領域方式 |
+|---|---|---|
+| タップダンス枠 | 末尾 N 枠を消費 | 消費しない |
+| GUI の欄名 | Tap / Hold / …（意味は仕様書頼み） | macOS / Windows / Linux / iOS / Default |
+| OS の粒度 | 4（iOS は Mac 扱い） | 5（iOS 独立、空欄なら Mac へフォールバック） |
+| keymap.c での既定値 | 不可 | `os_dance_actions[]` で可能 |
+| 導入 | `include` 行 + 枠数指定 | `OS_DANCE_ENABLE = yes` の 1 行 |
+
+### 15.2 使い方
+
+```make
+# rules.mk
+OS_DANCE_ENABLE = yes
+```
+
+```c
+// keymap.c
+const os_dance_entry_t os_dance_actions[VIAL_OS_DANCE_ENTRIES] = {
+    [0] = OS_DANCE(.kc_macos = KC_LGUI, .kc_windows = KC_LCTL),
+};
+// キーマップでは OSD(0) を置く
+```
+
+### 15.3 EEPROM
+
+固定長領域の最後尾（Alt Repeat Key の直後、マクロの直前）に 160 バイト（16 件 × 10 バイト。当初 10 件、2026-09-06 に 16 件へ変更）。
+Lettio では 1891〜2050。マクロ領域は 2205 → 2045 バイトに縮むが、サイズは実行時に
+ホストへ報告されるため GUI は自動追従する。ジョイスティック校正値（41〜50）は上流側にあり、
+アドレスは動かない（ビルド時アサートで衝突しないことを確認済み）。
+
+### 15.4 追加したビルド時アサート
+
+| 場所 | 内容 |
+|---|---|
+| `quantum/os_dance/os_dance.c` | `VIAL_OS_DANCE_ENTRIES` が 32 を超えたらエラー（`OSD(n)` の 5 ビットが折り返すため） |
+| `quantum/nvm/eeprom/nvm_dynamic_keymap.c` | OS Dance 領域がマクロ領域と重なったらエラー（`DYNAMIC_KEYMAP_MACRO_EEPROM_ADDR` を config.h で固定している機種向け） |
+
+どちらも意図的に条件を破ってビルドし、発火することを確認した。
+
+### 15.5 併せて直したもの
+
+`keymaps/default/vial.json` に相乗り方式の `"osDance": {"base": 24, "count": 8}` が残っていた。
+新方式の対応判定は Vial プロトコルの機能ビット（bit2）で行うため不要であり、
+残すと GUI 側のタップダンスタブが 24 件に絞られたままになるので削除した。
+
+### 15.6 ドキュメント
+
+| ファイル | 内容 |
+|---|---|
+| `quantum/os_dance/docs/os-dance-design.md` | ファームウェア設計書 |
+| `quantum/os_dance/docs/os-dance-protocol.md` | Vial-GUI 向けプロトコル仕様書（サブコマンド 0x09/0x0A、msg[4]、bit2、`.vil` の `os_dance` キー） |
+
+## 16. 「OS Dance」を「HostOS」に改名（2026-09-07）
+
+upstream への PR に先立ち、機能名を **HostOS** に改めた。「OS Dance」はタップダンス相乗り時代の
+名残で、独立機能となった今はタップダンスの一種と誤解させるため。「Platform」は QMK で
+MCU 基盤を指す既存用語（`platforms/`、`PLATFORM_KEY`）と衝突するので避けた。
+「Host OS」は QMK 自身が `detected_host_os()` で使っている語彙。
+
+| 旧 | 新 |
+|---|---|
+| `OS_DANCE_ENABLE` | `HOST_OS_ENABLE` |
+| `OSD(n)` / `QK_OS_DANCE` | `HOS(n)` / `QK_HOST_OS` |
+| `os_dance_entry_t` / `OS_DANCE(...)` / `os_dance_actions[]` | `host_os_entry_t` / `HOST_OS(...)` / `host_os_actions[]` |
+| `VIAL_OS_DANCE_ENABLE` / `VIAL_OS_DANCE_ENTRIES` | `VIAL_HOST_OS_ENABLE` / `VIAL_HOST_OS_ENTRIES` |
+| `dynamic_vial_os_dance_get/set` | `dynamic_vial_host_os_get/set`（番号 0x09/0x0A は不変） |
+| `quantum/os_dance/` | `quantum/host_os/` |
+| Vial GUI タブ / `.vil` キー | HostOS / `host_os` |
+
+プロトコルの数値（サブコマンド番号・機能ビット bit2・`msg[4]`・キーコード `0x7E20`〜）は変えていない。
+§11〜§15 の本文は当時の名前（OS Dance）のまま残している。
+
+## 17. HostOS を専用 EEPROM 領域方式からタップダンス相乗り方式へ戻した（2026-09-08）
+
+upstream への PR を取りやめたため、Vial 本体（`quantum/`）への変更をすべて元に戻し、
+HostOS は当初のタップダンス相乗り方式に戻した。名前（HostOS / `HOS(n)`）と、
+`rules.mk` で宣言する導入方法は維持している。
+
+| 項目 | 内容 |
+|---|---|
+| 有効化 | vial.json に `"hostOS": {"count": 16}`（件数はここだけ）、keymap の rules.mk に `include quantum/host_os/host_os.mk` の 1 行（2026-09-10 に build_vial.mk 非依存・単一情報源へ変更） |
+| 枠 | タップダンス末尾 `HOST_OS_COUNT` 件。32 枠なら `TD(0)`〜`TD(15)` が通常、`TD(16)`〜`TD(31)` が HostOS |
+| `HOS(n)` | `TD(HOST_OS_BASE + n)` の別名（`host_os.h`、keymap.c で `#include "host_os.h"`） |
+| 欄の意味 | Tap=macOS(iOS) / Hold=Windows / DoubleTap=Linux / Tap+Hold=Default。`tapping_term` は初期化済みマーカー `0x4F53` |
+| 既定値 | `host_os_actions[]` を、起動時に「空でマーカー無し」の枠にだけ書き込む（`keyboard_post_init_kb()`） |
+| GUI への通知 | `vial.json` の `"hostOS": {"count": N}`。firmware も同じ値を `host_os.mk` 経由で読む。プロトコル不変 |
+| Vial 本体の変更 | **なし**。`builddefs/` も `quantum/` も HEAD と同一（`quantum/host_os/` は追加ディレクトリ） |
+| EEPROM | レイアウト不変（マクロ 1891〜4095、2205 バイト） |
+
+仕様: `quantum/host_os/docs/host-os-design.md`、GUI 向け: `host-os-protocol.md`。
+

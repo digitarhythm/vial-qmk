@@ -23,9 +23,10 @@
 
 #define HOLD_ON_OTHER_KEY_PRESS
 
-// VIA custom config 領域の先頭アドレス
-// = EECONFIG_SIZE(37) + VIA_MAGIC(3) + VIA_LAYOUT_OPTIONS(1) = 41
-#define JOYSTICK_CALIB_EEPROM_ADDR 41
+// ジョイスティック校正値の保存先は qmk_analog_stick.c が
+// JOYSTICK_EEPROM_ADDR = VIA_EEPROM_CUSTOM_CONFIG_ADDR として自動計算する。
+// 予約バイト数は keyboards/trek/rouge/config.h の
+// VIA_EEPROM_CUSTOM_CONFIG_SIZE で指定する（アドレスをここで直書きしてはいけない）。
 
 /* Select hand configuration */
 

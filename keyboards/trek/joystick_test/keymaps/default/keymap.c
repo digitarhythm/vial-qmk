@@ -3,10 +3,6 @@
 
 #include QMK_KEYBOARD_H
 
-#ifdef OS_DETECTION_ENABLE
-  #include "os_detection.h"
-#endif
-
 #define _BASE    0
 #define _BASE2   1
 #define _LOWER   2
@@ -14,16 +10,8 @@
 #define _ADJUST  4
 #define _ADJUST2 5
 
-enum {
-  _MAC,
-  _WIN
-} os_layer_num;
-
-enum custom_keycodes {
-    JS_CALIB_START = SAFE_RANGE,  // キャリブレーション開始
-    JS_CALIB_END,                 // キャリブレーション終了・保存
-    JS_CALIB_RESET,               // キャリブレーションデータを消去
-};
+// OS-specific keys are handled by HostOS (HOS(n), quantum/host_os).
+// Layer switching on OS detection was removed, so per-OS base layers are no longer needed.
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT(
@@ -149,39 +137,7 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #include "qmk_analog_stick.h"
 
 void keyboard_post_init_user(void) {
-#ifdef OS_DETECTION_ENABLE
-    wait_ms(400);
-    switch (detected_host_os()) {
-        case OS_WINDOWS:
-        case OS_LINUX:
-            layer_move(_WIN);
-            break;
-        case OS_MACOS:
-        case OS_IOS:
-        default:
-            layer_move(_MAC);
-            break;
-    }
-#endif
-
     analog_stick_init();
-}
-
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (record->event.pressed) {
-        switch (keycode) {
-            case JS_CALIB_START:
-                analog_stick_calibration_start();
-                return false;
-            case JS_CALIB_END:
-                analog_stick_calibration_end();
-                return false;
-            case JS_CALIB_RESET:
-                analog_stick_calibration_reset();
-                return false;
-        }
-    }
-    return true;
 }
 
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {

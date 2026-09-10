@@ -1,4 +1,5 @@
 {
+  "hostOS": {"count": 16},
   "customKeycodes": [
     {"name": "Calib Start", "title": "Joystick Calibration Start", "shortName": "CLB_S"},
     {"name": "Calib End",   "title": "Joystick Calibration End",   "shortName": "CLB_E"},

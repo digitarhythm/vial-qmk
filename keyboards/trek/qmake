@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+KBDNAME=$1
+
+qmk compile -j0 -km default -kb trek/${KBDNAME}

@@ -3,10 +3,6 @@
 
 #include QMK_KEYBOARD_H
 
-#ifdef OS_DETECTION_ENABLE
-  #include "os_detection.h"
-#endif
-
 #define _BASE    0
 #define _BASE2   1
 #define _LOWER   2
@@ -14,10 +10,8 @@
 #define _ADJUST  4
 #define _ADJUST2 5
 
-enum {
-  _MAC,
-  _WIN
-} os_layer_num;
+// OS-specific keys are handled by HostOS (HOS(n), quantum/host_os).
+// Layer switching on OS detection was removed, so per-OS base layers are no longer needed.
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT(
@@ -127,23 +121,3 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
   [_ADJUST2] = { ENCODER_CCW_CW(_______, _______),             ENCODER_CCW_CW(_______, _______)            , ENCODER_CCW_CW(_______, _______) }
 };
 #endif
-
-#ifdef OS_DETECTION_ENABLE
-void keyboard_post_init_user(void) {
-  wait_ms(400);
-
-  switch (detected_host_os()) {
-    case OS_MACOS:
-    case OS_IOS:
-      layer_move(_MAC);
-      break;
-
-    case OS_WINDOWS:
-    case OS_LINUX:
-    default:
-      layer_move(_WIN);
-      break;
-  }
-}
-#endif
-

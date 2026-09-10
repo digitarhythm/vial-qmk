@@ -4,10 +4,6 @@
 
 #include QMK_KEYBOARD_H
 
-#ifdef OS_DETECTION_ENABLE
-  #include "os_detection.h"
-#endif
-
 #define _BASE    0
 #define _BASE2   1
 #define _LOWER   2
@@ -15,10 +11,8 @@
 #define _ADJUST  4
 #define _ADJUST2 5
 
-enum {
-  _MAC,
-  _WIN
-} os_layer_num;
+// OS-specific keys are handled by HostOS (HOS(n), quantum/host_os).
+// Layer switching on OS detection was removed, so per-OS base layers are no longer needed.
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
@@ -76,24 +70,6 @@ void keyboard_post_init_user(void) {
     analog_stick_init();
 }
 
-#ifdef OS_DETECTION_ENABLE
-// OS判別が安定するたびに呼ばれる（PC起動時やスリープ復帰後の再判別にも追従する）
-bool process_detected_host_os_user(os_variant_t detected_os) {
-    switch (detected_os) {
-        case OS_WINDOWS:
-        case OS_LINUX:
-            layer_move(_WIN);
-            break;
-        case OS_MACOS:
-        case OS_IOS:
-        default:
-            layer_move(_MAC);
-            break;
-    }
-    return true;
-}
-#endif
-
 // スクロール方向の反転は config.h の JOYSTICK_SCROLL_INVERT_V / _H で設定する
 // （ライブラリ側で反転済みの値が返る）
 
@@ -145,4 +121,3 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
 
     return mouse_report;
 }
-

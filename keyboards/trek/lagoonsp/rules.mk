@@ -11,4 +11,3 @@ CUSTOM_MATRIX = lite
 DEBOUNCE_TYPE = sym_eager_pk
 
 SRC += matrix.c
-

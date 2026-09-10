@@ -51,6 +51,10 @@
 //       DYNAMIC_KEYMAP_LAYER_COUNT から算出される。これらを変更すると
 //       エンコーダ以降の保存内容が別アドレスに移動するため、
 //       書き込み済みの EEPROM は必ずリセットすること。
+//
+// HostOS（rules.mk の HOST_OS_ENABLE = yes / HOST_OS_COUNT）は専用領域を持たず、
+// Vial タップダンス領域（739〜1058）の末尾 HOST_OS_COUNT 件をそのまま使う。
+// EEPROM のレイアウトは HostOS の有無で変わらない。
 #define VIA_EEPROM_CUSTOM_CONFIG_SIZE 10
 
 // アナログスティックでの縦スクロール方向を上下反転

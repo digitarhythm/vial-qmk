@@ -20,3 +20,6 @@
 #define DYNAMIC_KEYMAP_LAYER_COUNT 6
 #define LAYER_STATE_8BIT
 
+
+// 自動レンジ学習の保存用（VIA カスタム設定領域 10 バイトを予約）
+#define VIA_EEPROM_CUSTOM_CONFIG_SIZE 10

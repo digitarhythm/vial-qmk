@@ -37,9 +37,9 @@
   },
   "encoder": {
     "rotary": [
-      { "pin_a":  "GP0", "pin_b":  "GP1", "resolution": 4 },
-      { "pin_a":  "GP9", "pin_b": "GP10", "resolution": 4 },
-      { "pin_a": "GP11", "pin_b": "GP12", "resolution": 4 }
+      { "pin_a":  "GP0", "pin_b":  "GP1", "resolution": 2 },
+      { "pin_a":  "GP9", "pin_b": "GP10", "resolution": 2 },
+      { "pin_a": "GP11", "pin_b": "GP12", "resolution": 2 }
     ]
   },
   "processor": "RP2040",

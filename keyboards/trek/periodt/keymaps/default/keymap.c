@@ -10,7 +10,7 @@
 #define _ADJUST  4
 #define _ADJUST2 5
 
-// OS-specific keys are handled by OS Dance (OSD(n), quantum/os_dance).
+// OS-specific keys are handled by HostOS (HOS(n), quantum/host_os).
 // Layer switching on OS detection was removed, so per-OS base layers are no longer needed.
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {

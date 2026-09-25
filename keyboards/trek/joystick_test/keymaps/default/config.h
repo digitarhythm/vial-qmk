@@ -21,11 +21,26 @@
 #define VIAL_UNLOCK_COMBO_ROWS { 0, 0 }
 #define VIAL_UNLOCK_COMBO_COLS { 0, 1 }
 
-// JS-16 接続ピン
+// ===== アナログスティック: PSP1000（スイッチなし） =====
+// 接続ピン（RP2040 ADC2 / ADC3）
 #define JOYSTICK_X_PIN GP28
 #define JOYSTICK_Y_PIN GP29
+// PSP1000 スティックには押し込みスイッチが無いため JOYSTICK_SW_PIN は定義しない
+// （未定義ならライブラリ側でクリック機能が無効になる）
 
-#define JOYSTICK_ADC_Y_MAX 784
+// ADC レンジ（実測値: 2026-09-20、X/Y ともに 524〜1023）
+// 4 つすべてを定義しているため固定レンジモードで動作する（自動レンジ学習は無効）。
+// 中心値は起動時に計測され、中心から各レンジ端までを個別に ±1000 へ正規化するので
+// 中心が 0〜1023 の中央に無くても問題ない。
+#define JOYSTICK_ADC_X_MIN  480
+#define JOYSTICK_ADC_X_MAX 1023
+#define JOYSTICK_ADC_Y_MIN  525
+#define JOYSTICK_ADC_Y_MAX 1023
+
+// 取り付け向きの都合で上下のみ反転（左右はそのまま）
+#define JOYSTICK_INVERT_Y 1
+#define JOYSTICK_MAX_SPEED 4000
+#define JOYSTICK_DEADZONE 256
 
 /* Select hand configuration */
 
@@ -40,7 +55,7 @@
   #define RGB_MATRIX_KEYPRESSES
   #define RGB_MATRIX_LED_PROCESS_LIMIT (RGB_MATRIX_LED_COUNT + 4) / 5
   #define RGB_MATRIX_LED_FLUSH_LIMIT 16
-  #define RGB_MATRIX_MAXIMUM_BRIGHTNESS 100
+  #define RGB_MATRIX_MAXIMUM_BRIGHTNESS 256
   #define RGB_MATRIX_DEFAULT_HUE 0
   #define RGB_MATRIX_DEFAULT_SAT 255
   #define RGB_MATRIX_DEFAULT_VAL 50

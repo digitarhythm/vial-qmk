@@ -140,6 +140,7 @@ void keyboard_post_init_user(void) {
     analog_stick_init();
 }
 
+// 上下反転は config.h の JOYSTICK_INVERT_Y でライブラリ側に任せている
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     return analog_stick_update(mouse_report);
 }

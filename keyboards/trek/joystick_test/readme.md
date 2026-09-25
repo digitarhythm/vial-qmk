@@ -1,10 +1,23 @@
 # Joystick Test
 
-*A short description of the keyboard/project*
+Test firmware for driving an analog stick as a pointing device with `qmk_analog_stick`.
+The current target is the **PSP1000 analog stick** (no push switch).
 
 * Keyboard Maintainer: [digitarhythm](https://github.com/digitarhythm)
-* Hardware Supported: *The PCBs, controllers supported*
+* Hardware Supported: RP2040-Zero + PSP1000 analog stick
 * Hardware Availability: *Links to where you can find this hardware*
+
+## Analog stick (PSP1000)
+
+| Signal | Pin  | RP2040 ADC |
+|--------|------|------------|
+| X axis | GP28 | ADC2       |
+| Y axis | GP29 | ADC3       |
+| Switch | none | -          |
+
+Settings live in `keymaps/default/config.h`. Until the measured ADC min/max of both axes are
+defined (`JOYSTICK_ADC_X_MIN` / `_X_MAX` / `_Y_MIN` / `_Y_MAX`), the library runs in
+auto range-learning mode. See `docs/psp1000_analog_stick.md` for the design notes.
 
 Make example for this keyboard (after setting up your build environment):
 

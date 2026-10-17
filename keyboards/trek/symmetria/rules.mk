@@ -1,9 +1,10 @@
-ENCODER_MAP_ENABLE = yes
+# Build Options (feature switches live in keyboard.json)
 MAGIC_ENABLE = no
-BOOTMAGIC_ENABLE = yes
-OS_DETECTION_ENABLE = yes
+GRAVE_ESC_ENABLE = yes
+ENCODER_MAP_ENABLE = yes
 
 AUDIO_ENABLE = no
+BACKLIGHT_ENABLE = no
 
 CUSTOM_MATRIX = lite
 DEBOUNCE_TYPE = sym_eager_pk

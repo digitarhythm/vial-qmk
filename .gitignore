@@ -33,7 +33,7 @@ api_data/v1
 quantum/version.h
 *.bin
 *.eep
-*.hex
+#*.hex
 *.qmk
 *.uf2
 *.vfw

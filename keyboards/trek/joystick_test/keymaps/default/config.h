@@ -32,15 +32,15 @@
 // 4 つすべてを定義しているため固定レンジモードで動作する（自動レンジ学習は無効）。
 // 中心値は起動時に計測され、中心から各レンジ端までを個別に ±1000 へ正規化するので
 // 中心が 0〜1023 の中央に無くても問題ない。
-#define JOYSTICK_ADC_X_MIN  480
+#define JOYSTICK_ADC_X_MIN  526
 #define JOYSTICK_ADC_X_MAX 1023
-#define JOYSTICK_ADC_Y_MIN  525
+#define JOYSTICK_ADC_Y_MIN  256
 #define JOYSTICK_ADC_Y_MAX 1023
 
 // 取り付け向きの都合で上下のみ反転（左右はそのまま）
 #define JOYSTICK_INVERT_Y 1
-#define JOYSTICK_MAX_SPEED 4000
-#define JOYSTICK_DEADZONE 256
+#define JOYSTICK_MAX_SPEED 1600
+#define JOYSTICK_DEADZONE 100
 
 /* Select hand configuration */
 
